@@ -23,4 +23,4 @@ As it needs to support multiple machines, we may use network communication (sock
 ## For Storage Processes shutdown
 The main process will trigger the erasure codes to repair the data （根据课上的内容进行）.
 
-![avatar](./img/aa.png)
+![avatar](https://raw.githubusercontent.com/Shaowen310/raid6/main/imgs/aa.png?token=ANCBBUOOVS46772H32MUXH27UKYIS)
