@@ -20,3 +20,5 @@ This process is used by some users, we can use it to upload, download, delete fi
 ## For Communication
 As it needs to support multiple machines, we may use network communication (socket?) among all processes.
 
+## For Storage Processes shutdown
+The main process will trigger the erasure codes to repair the data （根据课上的内容进行）.
