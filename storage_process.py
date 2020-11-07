@@ -11,21 +11,25 @@ def read_block(PATH):
 
 def write_block(PATH1, PATH2):
     i = 0
-    with open(PATH2, 'rb+') as read_b:
-        p = os.path.join(PATH1,i)
-        while True:
-            content1 = read_b.read(32*1024)
-            with open(p,'wb+') as w_b:
+    read_b = open(PATH2, "rb")
 
-            print(len(content1))
-            if len(content1) == 0:
-                break
-            else:
-                print(content1)
+    while True:
+        content1 = read_b.read(config.BS * 1024 - config.BFI)
 
-    # contents.
-    # print(contents)
-    # print(contents[0])
+        if len(content1) == 0:
+            break
+        else:
+            p = os.path.join(PATH1, str(i)+'.bin')
+            writh_b = open(p, "wb")
+            length = struct.pack('I', len(content1))
+            writh_b.write(length)
+            writh_b.write(content1)
+            writh_b.flush()
+            writh_b.seek()
+            writh_b.close()
+        i = i + 1
+    read_b.close()
+
 
 
 class Storage:
@@ -39,7 +43,13 @@ class Storage:
             self.init()
 
     def init(self):
-        return -1
+        for block in range(config.BN):
+            path = os.path.join(self.save_path, str(block) + '.bin')
+            init_b = open(path, "wb")
+            for _ in range(config.BS * 1024):
+                init_b.write(b'\x00')
+            init_b.flush()
+            init_b.close()
 
     def write(self, contents):
         return -1
@@ -55,14 +65,27 @@ class Storage:
 
 
 if __name__ == '__main__':
-    write_block(',', './imgs/aa.png')
+    config = Config()
+
+    i = 0
+
+    while i<6:
+
+        p = os.path.join('./imgs', str(i)+'.bin')
+        writh_b = open(p, "wb")
+        for k in range(config.BS*1024):
+            writh_b.write(b'\x00')
+        writh_b.flush()
+        writh_b.close()
+        i = i + 1
+    # exit()
+    write_block('./imgs/', './imgs/aa.png')
     # parser = argparse.ArgumentParser(description='Storage Process')
     # parser.add_argument('--ip', default='127.0.0.1', type=str, help='main process ip address (default: localhost)')
     # parser.add_argument('--port', default=12345, type=int, help='main process port for storage (default 12345)')
     # parser.add_argument('--path', default='', type=str, help='save path, blank for first run')
     # args = parser.parse_args()
     #
-    # config = Config()
     #
     # init = False
     # PATH = args.path
