@@ -84,19 +84,19 @@ class Storage:
 if __name__ == '__main__':
     config = Config()
     #
-    # i = 0
-    #
-    # while i<6:
-    #
-    #     p = os.path.join('./imgs', str(i)+'.bin')
-    #     writh_b = open(p, "wb")
-    #     for k in range(config.BS*1024):
-    #         writh_b.write(b'\x00')
-    #     writh_b.flush()
-    #     writh_b.close()
-    #     i = i + 1
-    # # exit()
-    # write_block('./imgs/', './imgs/aa.png')
+    i = 0
+
+    while i<6:
+
+        p = os.path.join('./imgs', str(i)+'.bin')
+        writh_b = open(p, "wb")
+        for k in range(config.BS*1024):
+            writh_b.write(b'\x00')
+        writh_b.flush()
+        writh_b.close()
+        i = i + 1
+    # exit()
+    write_block('./imgs/', './imgs/aa.png')
 
     read_block()
 
