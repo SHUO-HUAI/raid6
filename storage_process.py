@@ -5,8 +5,22 @@ from config import Config
 import struct
 
 
-def read_block(PATH):
-    return -1
+def read_block():
+    # return -1
+    all_centent = []
+    for i in range(4):
+        p = os.path.join('./imgs', str(i) + '.bin')
+        read_b = open(p, "rb")
+        data = read_b.read()
+        # print(len(data))
+
+        length = int(struct.unpack('I', data[:config.BFI])[0])
+        content = data[config.BFI:length + config.BFI]
+        all_centent.append(content)
+
+    write = open('./imgs/read.png', 'wb')
+    for c in all_centent:
+        write.write(c)
 
 
 def write_block(PATH1, PATH2):
@@ -19,17 +33,20 @@ def write_block(PATH1, PATH2):
         if len(content1) == 0:
             break
         else:
-            p = os.path.join(PATH1, str(i)+'.bin')
+            p = os.path.join(PATH1, str(i) + '.bin')
+            fr = open(p, "rb")
+            data = fr.read()
             writh_b = open(p, "wb")
+            writh_b.write(data)
             length = struct.pack('I', len(content1))
+            writh_b.seek(0x0)
             writh_b.write(length)
             writh_b.write(content1)
             writh_b.flush()
-            writh_b.seek()
+            fr.close()
             writh_b.close()
         i = i + 1
     read_b.close()
-
 
 
 class Storage:
@@ -66,20 +83,23 @@ class Storage:
 
 if __name__ == '__main__':
     config = Config()
+    #
+    # i = 0
+    #
+    # while i<6:
+    #
+    #     p = os.path.join('./imgs', str(i)+'.bin')
+    #     writh_b = open(p, "wb")
+    #     for k in range(config.BS*1024):
+    #         writh_b.write(b'\x00')
+    #     writh_b.flush()
+    #     writh_b.close()
+    #     i = i + 1
+    # # exit()
+    # write_block('./imgs/', './imgs/aa.png')
 
-    i = 0
+    read_block()
 
-    while i<6:
-
-        p = os.path.join('./imgs', str(i)+'.bin')
-        writh_b = open(p, "wb")
-        for k in range(config.BS*1024):
-            writh_b.write(b'\x00')
-        writh_b.flush()
-        writh_b.close()
-        i = i + 1
-    # exit()
-    write_block('./imgs/', './imgs/aa.png')
     # parser = argparse.ArgumentParser(description='Storage Process')
     # parser.add_argument('--ip', default='127.0.0.1', type=str, help='main process ip address (default: localhost)')
     # parser.add_argument('--port', default=12345, type=int, help='main process port for storage (default 12345)')
