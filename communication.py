@@ -51,6 +51,7 @@ class Communication:
 
         assert len(self.comm) > 0
 
+    # storage id is used by main process to identify which storage process to write in
     def send(self, contents, storage_id=None):
         if storage_id is not None:
             comm = self.comm[storage_id]
@@ -81,6 +82,7 @@ class Communication:
             return -1  # need to be record by main process, then re-construct
         return 1
 
+    # storage id is used by main process to identify which storage process to read from
     def receive(self, storage_id=None):
 
         if storage_id is not None:
