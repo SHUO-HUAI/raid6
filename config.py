@@ -14,3 +14,6 @@ class Config:
     SN = 6  # storage process number
     SP = 2  # parities number
     SS = SN - SP  # for storage
+
+    ERROR = 0  # as all stuck pack we used is unsigned int, so we use 0 for error
+    SUCC = 1

@@ -169,5 +169,5 @@ if __name__ == '__main__':
             com_service.send(success)
         else:
             chaos = com_service.receive()
-            com_service.send(-1)
+            com_service.send(Config.ERROR)
             raise Exception

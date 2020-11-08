@@ -80,8 +80,8 @@ class Communication:
         except BrokenPipeError as e:
             print(str(storage_id) + ' has been broken!!')
             # del self.comm[storage_id]
-            return -1  # need to be record by main process, then re-construct
-        return 1
+            return Config.ERROR  # need to be record by main process, then re-construct
+        return Config.SUCC
 
     # storage id is used by main process to identify which storage process to read from
     def receive(self, storage_id=None):
@@ -143,7 +143,7 @@ if __name__ == '__main__':
             a = input()
             for i in range(Config.SN):
                 r = C.send(a + ' to ' + str(i), i)
-                if r != -1:
+                if r != Config.ERROR:
                     b = C.receive(i)
                     print(b)
         else:
