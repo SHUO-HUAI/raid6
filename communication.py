@@ -51,7 +51,8 @@ class Communication:
 
         assert len(self.comm) > 0
 
-    # storage id is used by main process to identify which storage process to write in
+    # storage id is used by main process to identify which storage process to write in.
+    # for storage process, as it is client, it only connect to a server, so no storage id is needed
     def send(self, contents, storage_id=None):
         if storage_id is not None:
             comm = self.comm[storage_id]
