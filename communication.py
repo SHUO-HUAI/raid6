@@ -48,6 +48,7 @@ class Communication:
                 except socket.error as msg:
                     if server_port == server_ports[-1]:
                         print(msg)
+                        exit()
 
         assert len(self.comm) > 0
 
