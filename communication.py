@@ -17,8 +17,8 @@ class Communication:
             try:
                 skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 skt.connect(('8.8.8.8', 80))
-                socketIpPort = skt.getsockname()
-                my_ip = socketIpPort[0]
+                socket_ip_port = skt.getsockname()
+                my_ip = socket_ip_port[0]
                 skt.close()
             except socket.error as msg:
                 print(msg)
