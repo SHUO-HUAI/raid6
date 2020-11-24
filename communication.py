@@ -7,11 +7,18 @@ from config import Config
 
 
 class Communication:
-    def __init__(self, server_ip=None, server_ports=None, is_server=False):
-        if server_ports is None:
-            server_ports = [9990 + port_i for port_i in range(Config.SN)]
+    def __init__(self, server_ip=None, server_ports=None, is_server=False, for_user=False):
+        if server_ports is None and not for_user:
+            server_ports = [9990 + port_i for port_i in range(Config.SN)]  # initialize the port if no one input
+        elif server_ports is None and for_user:
+            server_ports = [12346]
         self.comm = []
-        assert len(server_ports) == Config.SN
+
+        if not for_user:
+            assert len(server_ports) == Config.SN
+        else:
+            assert len(server_ports) == 1
+
         if is_server:
             self.comm = []
             try:
@@ -26,7 +33,8 @@ class Communication:
 
             try:
                 for server_port in server_ports:
-                    print('Waiting for another {} storage processes'.format(Config.SN - len(self.comm)))
+                    if not for_user:
+                        print('Waiting for another {} storage processes'.format(Config.SN - len(self.comm)))
                     socketser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     socketser.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                     socketser.bind((my_ip, server_port))

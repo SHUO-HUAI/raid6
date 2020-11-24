@@ -1,6 +1,8 @@
 import argparse
 import os
 import random
+import socket
+import sys
 from datetime import datetime
 from config import Config
 import struct
@@ -123,8 +125,8 @@ class Storage:
 
         return block_id
 
-    def connect(self, host_ip, port):
-        com_ser = Communication(host_ip, port, False)
+    def connect(self, host_ip, ports):
+        com_ser = Communication(host_ip, ports, is_server=False, for_user=False)
         return com_ser
 
 
@@ -132,7 +134,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Storage Process')
     parser.add_argument('--ip', default='127.0.0.1', type=str, help='main process ip address (default: localhost)')
-    parser.add_argument('--port', default=12345, type=int, help='main process port for storage (default 12345)')
+    parser.add_argument('--storage_port', default=[9990 + port_i for port_i in range(Config.SN)], type=list,
+                        help='main process ports for storage process')
     parser.add_argument('--path', default='', type=str, help='save path, blank for first run')
     args = parser.parse_args()
 
@@ -146,8 +149,18 @@ if __name__ == '__main__':
         os.makedirs(PATH)
         init = True
 
+    try:
+        skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        skt.connect(('8.8.8.8', 80))
+        socketIpPort = skt.getsockname()
+        my_ip = socketIpPort[0]
+        skt.close()
+    except socket.error as msg:
+        print(msg)
+        sys.exit(1)
+
     storage_process = Storage(PATH, init)
-    com_service = storage_process.connect(args.ip, args.port)
+    com_service = storage_process.connect(my_ip, args.storage_port)  # my_ip is used for localhost test
 
     while True:
         command = com_service.receive()
