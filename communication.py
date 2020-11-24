@@ -7,7 +7,9 @@ from config import Config
 
 
 class Communication:
-    def __init__(self, server_ip=None, server_ports=(9999, 9998, 9997, 9996, 9995, 9994), is_server=False):
+    def __init__(self, server_ip=None, server_ports=None, is_server=False):
+        if server_ports is None:
+            server_ports = [9990 + port_i for port_i in range(Config.SN)]
         self.comm = []
         assert len(server_ports) == Config.SN
         if is_server:
