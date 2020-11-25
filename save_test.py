@@ -10,7 +10,7 @@ def read_block():
         p = os.path.join('./imgs', str(i) + '.bin')
         read_b = open(p, "rb")
         data = read_b.read()
-        # print(len(data))
+        print(data[0])
 
         length = int(struct.unpack('I', data[:Config.BFI])[0])
         content = data[Config.BFI:length + Config.BFI]
