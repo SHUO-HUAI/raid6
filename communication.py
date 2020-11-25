@@ -17,7 +17,7 @@ class Communication:
         if not for_user:
             assert len(server_ports) == Config.SN
         else:
-            assert len(server_ports) == 1
+            assert len([server_ports]) == 1
 
         if is_server:
             self.comm = []

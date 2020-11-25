@@ -11,22 +11,27 @@ from communication import Communication
 
 
 class Main:
-    def __init__(self):
+    def __init__(self, ip, ports_for_storage, port_for_user):
         self.a = 0
         self.gfbase = 29
-        self.gfbound = 2**8
+        self.gfbound = 2 ** 8
         self.gfilog = self._gfilog()
         self.gflog = self._gflog()
 
-    def connect(self, ip, ports_for_storage, port_for_user):
         storage_com_ser = Communication(ip, ports_for_storage, is_server=True, for_user=False)
-        user_com_ser = Communication(ip, port_for_user, is_server=True, for_user=True)
-        return storage_com_ser, user_com_ser
+        # user_com_ser = Communication(ip, port_for_user, is_server=True, for_user=True)
+        user_com_ser = None
+        self.storage_ser = storage_com_ser
+        self.usr_com = user_com_ser
+
+        self.write_finish = False  # used for record a file if finishing writing
+        self.write_record_tmp = []  # used for tmp save write information
+        self.all_record_files = {}  # record all save files, including the filename and storage location, save down when shutdown
 
     def coefficient(self, index):
-        if 2**index < self.gfbound:
-            return 2**index
-        elif 2**index >= self.gfbound:
+        if 2 ** index < self.gfbound:
+            return 2 ** index
+        elif 2 ** index >= self.gfbound:
             coeff = 2 * self.coefficient(index - 1)
             if coeff < self.gfbound:
                 return coeff
@@ -55,11 +60,12 @@ class Main:
     inputs: storages: lists of all storage processes; block_id: the block_id to write data
     outputs: p_block: renewed block (corresponding to block_id) of P party; q_block renewed block of Q party 
     '''
+
     def parties_renew(self, storages, block_id):
         blocks = list()
         coeffs = list()
         for st_id in range(Config.SS):
-            blocks.append(storages[st_id].read(block_id))
+            blocks.append(storages[st_id].read(block_id))  # contents
             coeffs.append(self.gfilog[st_id])
 
         p_block = list()
@@ -74,12 +80,13 @@ class Main:
             p_block.append(p_check)
             q_block.append(q_check)
 
-        return p_block, q_block
+        return p_block, q_block  # contents
 
     '''
     input: storages: ...; corrupt_id: the storage process you use; block_id: the block you read
     output:  recover_block: recovered data block
     '''
+
     def read_recover(self, storages, corrupt_id, block_id):
         blocks = list()
         # for P party
@@ -140,7 +147,7 @@ class Main:
             for i in range(Config.BS):
                 data1, data2 = 0, 0
                 for j in range(Config.SS - 2):
-                    data2 = data2 ^ self._gf_product(blocks[j][i], coeffs[j]) ^\
+                    data2 = data2 ^ self._gf_product(blocks[j][i], coeffs[j]) ^ \
                             self._gf_product(blocks[j][i], corp_coeff1)
                     data1 = data1 ^ blocks[j][i]
                 data2 = data2 ^ self._gf_product(p_block[i], corp_coeff1) ^ q_block[i]
@@ -151,6 +158,44 @@ class Main:
                 recover1.append(data1)
             return [recover1, recover2]
 
+    def write(self, content, filename=None):
+        # need to determine which storage save this content
+        # every time write a block to a storage for balance
+        # the last time for writing a file will record its information
+        assert not self.write_finish or filename is not None
+
+        if not self.write_finish:
+            free_blocks_each_stroage = []
+            for s_id in range(Config.SS):
+                self.storage_ser.send(Config.Free_blocks, s_id)
+                free_blocks = self.storage_ser.receive(s_id)
+                free_blocks_each_stroage.append(free_blocks)
+            free_blocks_each_stroage = np.array(free_blocks_each_stroage)
+
+            print(free_blocks_each_stroage)
+            storage_id = free_blocks_each_stroage.argmax()  # save content to the most empty storage
+            print(storage_id)
+
+            self.storage_ser.send(Config.Write_storage, storage_id)
+            self.storage_ser.send(content, storage_id)
+            block_id = self.storage_ser.receive(storage_id)
+            assert block_id != Config.ERROR
+            self.write_record_tmp.append([storage_id, block_id])
+        else:
+            assert filename not in self.all_record_files.keys()
+            self.all_record_files[filename] = np.array(self.write_record_tmp)
+            self.write_record_tmp = []
+            self.write_finish = False
+
+    def read(self, filename):
+        pass
+
+    def delete(self, filename):
+        pass
+
+    def modify(self, filename):
+        pass
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Main Process')
@@ -158,8 +203,6 @@ if __name__ == '__main__':
                         help='ports for storage process')
     parser.add_argument('--user_port', default=12346, type=int, help='port for user process, only support one user')
     args = parser.parse_args()
-
-    Main_process = Main()
 
     try:
         skt = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -174,22 +217,44 @@ if __name__ == '__main__':
     # my_ip is used for localhost test
     # it will first wait all storage processes to connect
     # then it will wait user process to connect, then it will listen to user's command
-    storage_com, user_com = Main_process.connect(my_ip, args.storage_port, args.user_port)
-
+    # storage_com, user_com = Main_process.connect(my_ip, args.storage_port, args.user_port)
+    Main_process = Main(my_ip, args.storage_port, args.user_port)
+    i = 0
     while True:
-        command = user_com.receive()
-        if command == 'upload':
-            filename = user_com.receive()
-            contents = user_com.receive()
-            # write contents to storage process
+        k = input()
+        if int(k) == 0:
+            break
 
-        elif command == 'download':
-            filename = user_com.receive()
-            # find the contents of filename from storage process
+        read_b = open("./imgs/Distributed system project 2020.docx", "rb")
+        Main_process.write_finish = False
+        name = "./imgs/test" + str(i)
+        while True:
+            content1 = read_b.read(Config.BS - Config.BFI)  # a content is a block size - information size
+            if len(content1) == 0:
+                break
+            else:
+                Main_process.write(content1)
+        read_b.close()
 
-        elif command == 'delete':
-            filename = user_com.receive()
-        else:
-            chaos = user_com.receive()
-            user_com.send(Config.ERROR)
-            raise Exception
+        i = i + 1
+        Main_process.write_finish = True
+        Main_process.write(0, name)
+        print(Main_process.all_record_files)
+
+    # while True:
+    #     command = user_com.receive()
+    #     if command == 'upload':
+    #         filename = user_com.receive()
+    #         contents = user_com.receive()
+    #         # write contents to storage process
+    #
+    #     elif command == 'download':
+    #         filename = user_com.receive()
+    #         # find the contents of filename from storage process
+    #
+    #     elif command == 'delete':
+    #         filename = user_com.receive()
+    #     else:
+    #         chaos = user_com.receive()
+    #         user_com.send(Config.ERROR)
+    #         raise Exception

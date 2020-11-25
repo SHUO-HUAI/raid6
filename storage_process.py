@@ -26,6 +26,23 @@ class Storage:
             init_b.flush()
             init_b.close()
 
+    def free_blocks(self):
+        each_block_save_num = int(Config.BS // Config.BFI)
+        b = range(Config.RBFM, Config.RBFM + Config.RBFS, 1)
+        rbfs = [bid for bid in b]
+        all_content = self.read(rbfs, record_file_info=True)
+
+        if_occupy = []
+
+        for block_i in range(Config.RBFM + Config.RBFS, Config.BN):
+            content_id = block_i // each_block_save_num
+            content_data_id = (block_i % each_block_save_num) * Config.BFI
+            occupy = int(
+                struct.unpack('I', all_content[content_id][content_data_id:content_data_id + Config.BFI])[0])
+            if_occupy.append(occupy)
+        no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
+        return len(no_occupy_index)
+
     def write(self, contents, block_id=None, record_file_info=False):
 
         content_length = len(contents)
@@ -36,7 +53,7 @@ class Storage:
             # random set block id
             b = range(Config.RBFM, Config.RBFM + Config.RBFS, 1)
             rbfs = [bid for bid in b]
-            all_content = self.read(rbfs)
+            all_content = self.read(rbfs, record_file_info=True)
 
             if_occupy = []
 
@@ -47,8 +64,12 @@ class Storage:
                     struct.unpack('I', all_content[content_id][content_data_id:content_data_id + Config.BFI])[0])
                 if_occupy.append(occupy)
             no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
-            block_id = random.sample(no_occupy_index, 1)
+            # print(no_occupy_index)
+            block_id = random.sample(no_occupy_index, 1)[0]
 
+        block_id = block_id + Config.RBFM + Config.RBFS
+
+        # whether used for record file information
         if not record_file_info:
             assert block_id >= Config.RBFM + Config.RBFS
         else:
@@ -87,7 +108,7 @@ class Storage:
 
         return block_id
 
-    def read(self, block_ids):
+    def read(self, block_ids, record_file_info=False):
 
         if type(block_ids) == int:
             block_ids = [block_ids]
@@ -97,10 +118,12 @@ class Storage:
             path = os.path.join(self.save_path, str(block_id) + '.bin')
             read_b = open(path, "rb")
             data = read_b.read()
-
-            length = int(struct.unpack('I', data[:Config.BFI])[0])
-            content = data[Config.BFI:length + Config.BFI]
-            all_content.append(content)
+            if not record_file_info:
+                length = int(struct.unpack('I', data[:Config.BFI])[0])
+                content = data[Config.BFI:length + Config.BFI]
+                all_content.append(content)
+            else:
+                all_content.append(data)
 
         return all_content
 
@@ -170,7 +193,7 @@ if __name__ == '__main__':
             contents = storage_process.read(block_id)
             com_service.send(contents)
 
-        elif command == 'write':
+        elif command == Config.Write_storage:
 
             contents = com_service.receive()
             success = storage_process.write(contents)
@@ -180,6 +203,9 @@ if __name__ == '__main__':
             block_id = com_service.receive()
             success = storage_process.delete(block_id)
             com_service.send(success)
+        elif command == Config.Free_blocks:
+            free_blocks = storage_process.free_blocks()
+            com_service.send(free_blocks)
         else:
             chaos = com_service.receive()
             com_service.send(Config.ERROR)

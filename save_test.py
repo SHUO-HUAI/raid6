@@ -16,7 +16,7 @@ def read_block():
         content = data[Config.BFI:length + Config.BFI]
         all_centent.append(content)
 
-    write = open('./imgs/read_2.png', 'wb')
+    write = open('./imgs/read_3.jpg', 'wb')
     for c in all_centent:
         write.write(c)
 
@@ -38,8 +38,8 @@ def write_block(PATH1, PATH2):
             writh_b.write(data)
             length = struct.pack('I', len(content1))
             writh_b.seek(0x0)
-            writh_b.write(length)
-            writh_b.write(content1)
+            writh_b.write(length + content1)
+            # writh_b.write(content1)
             writh_b.flush()
             fr.close()
             writh_b.close()
@@ -62,6 +62,6 @@ while i < 6:
     writh_b.close()
     i = i + 1
 # exit()
-write_block('./imgs/', './imgs/aa.png')
+write_block('./imgs/', './imgs/aa.jpg')
 
 read_block()
