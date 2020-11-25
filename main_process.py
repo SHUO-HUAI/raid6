@@ -162,6 +162,7 @@ class Main:
         # need to determine which storage save this content
         # every time write a block to a storage for balance
         # the last time for writing a file will record its information
+        # need to be done: p q
         assert not self.write_finish or filename is not None
 
         if not self.write_finish:
