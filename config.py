@@ -11,7 +11,7 @@ class Config:
     assert BN < RBFS * BS / BFI
     assert BS % BFI == 0
 
-    SN = 6  # storage process number
+    SN = 8  # storage process number
     SP = 2  # parities number
     SS = SN - SP  # for storage
 

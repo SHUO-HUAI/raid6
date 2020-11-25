@@ -193,4 +193,3 @@ if __name__ == '__main__':
             chaos = user_com.receive()
             user_com.send(Config.ERROR)
             raise Exception
-
