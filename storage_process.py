@@ -187,10 +187,10 @@ if __name__ == '__main__':
 
     while True:
         command = com_service.receive()
-        if command == 'read':
+        if command == Config.Read_storage:
 
             block_id = com_service.receive()
-            contents = storage_process.read(block_id)
+            contents = storage_process.read(block_id)  # return pure content
             com_service.send(contents)
 
         elif command == Config.Write_storage:

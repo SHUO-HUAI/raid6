@@ -61,11 +61,15 @@ class Main:
     outputs: p_block: renewed block (corresponding to block_id) of P party; q_block renewed block of Q party 
     '''
 
-    def parties_renew(self, storages, block_id):
+    def parties_renew(self, contents):
+        for c_i in contents:
+            print(c_i)
         blocks = list()
         coeffs = list()
+        assert len(contents) == Config.SS  # this line need to be modified when some storage shutdown
         for st_id in range(Config.SS):
-            blocks.append(storages[st_id].read(block_id))  # contents
+            # blocks.append(storages[st_id].read(block_id))  # contents
+            blocks.append(contents[st_id])
             coeffs.append(self.gfilog[st_id])
 
         p_block = list()
@@ -182,6 +186,19 @@ class Main:
             block_id = self.storage_ser.receive(storage_id)
             assert block_id != Config.ERROR
             self.write_record_tmp.append([storage_id, block_id])
+
+            # for computing p q
+            all_contents_for_pq = []
+            for s_id in range(Config.SS):
+                self.storage_ser.send(Config.Read_storage, s_id)  # read commend
+                self.storage_ser.send(block_id, s_id)  # read block
+                content_read = self.storage_ser.receive(s_id)
+                all_contents_for_pq.append(content_read)
+            p_block, q_block = self.parties_renew(all_contents_for_pq)
+            print(p_block)
+            print(q_block)
+
+
         else:
             assert filename not in self.all_record_files.keys()
             self.all_record_files[filename] = np.array(self.write_record_tmp)

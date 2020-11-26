@@ -2,7 +2,7 @@ import struct
 
 
 class Config:
-    BS = 16 * 1024  # block size in bytes
+    BS = 16 * 16  # block size in bytes
     BN = 16  # block number of each storage
     RBFM = 4  # reverse block number for save file name and other information, used by main process, first RBFM
     RBFS = 1  # reverse block number for storage process to save which blocks are used, after RBFM then RBFS
@@ -21,3 +21,4 @@ class Config:
     # commend
     Free_blocks = 'empty'
     Write_storage = 'write_sto'
+    Read_storage = 'read_sto'
