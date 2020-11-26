@@ -25,3 +25,4 @@ class Config:
     Write_storage = 'write_sto'
     Read_storage = 'read_sto'
     Ping_storage = 'ping_sto'
+    Delete_block = 'delete_block'

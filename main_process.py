@@ -248,9 +248,23 @@ class Main:
         return all_content
 
     def delete(self, filename):
-        pass
+        self.ping()
+        assert filename in self.all_record_files.keys()
+        write_records = self.all_record_files[filename]
+        # all_content = b''
+        contents_for_parties = []
+        for record in write_records:
+            storage_id = record[0]
+            block_id = record[1]
 
-    def modify(self, filename):
+            self.storage_ser.send(Config.Delete_block, storage_id)
+            self.storage_ser.send(block_id, storage_id)
+            SUCC = self.storage_ser.receive(storage_id)
+            assert SUCC != Config.ERROR
+
+    def modify(self, content, filename):
+        # delete and write, as write commend need to be called more than one times. so this method will implement
+        # in main function
         pass
 
     def ping(self):

@@ -204,7 +204,7 @@ if __name__ == '__main__':
                 success = storage_process.write(contents)
             com_service.send(success)
 
-        elif command == 'delete':
+        elif command == Config.Delete_block:
             block_id = com_service.receive()
             success = storage_process.delete(block_id)
             com_service.send(success)
