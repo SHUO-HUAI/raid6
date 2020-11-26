@@ -61,14 +61,14 @@ class Main:
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
-        return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) // 255]])
+        return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]])
 
     def _gf_div(self, x, coeff):
         if isinstance(x, bytes):
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
-        return bytes([self.gfilog[(self.gflog[x] - self.gflog[coeff] + 255) // 255]])
+        return bytes([self.gfilog[(self.gflog[x] - self.gflog[coeff] + 255) % 255]])
 
     '''
     inputs: storages: lists of all storage processes; block_id: the block_id to write data
@@ -179,13 +179,6 @@ class Main:
                 data1 ^= data2 ^ p_block[i]
                 recover1.append(data1)
             return [recover1, recover2]
-
-    def recover(self, broken_storage_ids, all_contents: dict):
-        return {}
-
-    def read_with_parties(self, all_contents, storage_id):
-        return b''
-        # return a content after verifying
 
     def write(self, content, filename=None):
         # need to determine which storage save this content
