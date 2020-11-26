@@ -17,7 +17,7 @@ class Config:
 
     assert SP == 2
 
-    ERROR = 0  # as all stuck pack we used is unsigned int, so we use 0 for error
+    ERROR = 4294967295  # as all stuck pack we used is unsigned int, so we use 4294967295 for error
     SUCC = 1
 
     # commend
