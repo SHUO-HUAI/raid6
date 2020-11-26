@@ -48,7 +48,8 @@ class Storage:
     def write(self, contents, block_id=None, record_file_info=False):
 
         content_length = len(contents)
-        assert content_length + Config.BFI <= Config.BS
+        if not record_file_info:
+            assert content_length + Config.BFI <= Config.BS
         each_block_save_num = int(Config.BS // Config.BFI)
 
         if block_id is None:
@@ -76,24 +77,26 @@ class Storage:
         # whether used for record file information
         if not record_file_info:
             assert block_id >= Config.RBFM + Config.RBFS
-        else:
-            assert block_id in range(Config.RBFM)
+        # else:
+            # assert block_id in range(Config.RBFM)
 
         # write contents to block id
-        path = os.path.join(self.save_path, str(block_id) + '.bin')
-        fr = open(path, "rb")
-        data = fr.read()
-        fw = open(path, "wb")
-        fw.write(data)
-        length = struct.pack('I', content_length)
-        fw.seek(0x0)
-        fw.write(length)
-        fw.write(contents)
-        fw.flush()
-        fr.close()
-        fw.close()
+
 
         if not record_file_info:
+            path = os.path.join(self.save_path, str(block_id) + '.bin')
+            fr = open(path, "rb")
+            data = fr.read()
+            fw = open(path, "wb")
+            fw.write(data)
+            length = struct.pack('I', content_length)
+            fw.seek(0x0)
+            fw.write(length)
+            fw.write(contents)
+            fw.flush()
+            fr.close()
+            fw.close()
+
             content_id = block_id // each_block_save_num
             content_data_id = (block_id % each_block_save_num) * Config.BFI
 
@@ -106,6 +109,19 @@ class Storage:
             record = struct.pack('I', 1)
             fw.seek(content_data_id)
             fw.write(record)
+            fw.flush()
+            fr.close()
+            fw.close()
+        else:
+            path = os.path.join(self.save_path, str(block_id) + '.bin')
+            fr = open(path, "rb")
+            data = fr.read()
+            fw = open(path, "wb")
+            fw.write(data)
+            # length = struct.pack('I', content_length)
+            fw.seek(0x0)
+            # fw.write(length)
+            fw.write(contents)
             fw.flush()
             fr.close()
             fw.close()
@@ -193,6 +209,12 @@ if __name__ == '__main__':
             contents = Storage_process.read(block_id)  # return pure content
             Storage_process.com_ser.send(contents)
 
+        elif command == Config.Read_storage_For_p:
+
+            block_id = Storage_process.com_ser.receive()
+            contents = Storage_process.read(block_id, record_file_info=True)  # return pure content
+            Storage_process.com_ser.send(contents)
+
         elif command == Config.Write_storage:
 
             block_id = Storage_process.com_ser.receive()
@@ -201,6 +223,16 @@ if __name__ == '__main__':
                 success = Storage_process.write(contents, block_id)
             else:
                 success = Storage_process.write(contents)
+            Storage_process.com_ser.send(success)
+
+        elif command == Config.Write_storage_For_p:
+
+            block_id = Storage_process.com_ser.receive()
+            contents = Storage_process.com_ser.receive()
+            if block_id != 'None':
+                success = Storage_process.write(contents, block_id, record_file_info=True)
+            else:
+                success = Storage_process.write(contents, record_file_info=True)
             Storage_process.com_ser.send(success)
 
         elif command == Config.Delete_block:

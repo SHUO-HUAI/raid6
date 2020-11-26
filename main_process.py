@@ -82,8 +82,7 @@ class Main:
 
         for c_i in range(len(contents)):
             # if contents[c_i][0] == b'':  # if blank then all zero
-            for _ in range(Config.BS - Config.BFI - len(contents[c_i][0])):
-                contents[c_i][0] += b'\x00'
+            assert len(contents[c_i][0]) == Config.BS
 
         blocks = list()
         coeffs = list()
@@ -95,7 +94,7 @@ class Main:
 
         p_block = b''
         q_block = b''
-        for i in range(Config.BS - Config.BFI):
+        for i in range(Config.BS):
             p_check = b'\x00'
             q_check = b'\x00'
             for j in range(Config.SS):
@@ -213,7 +212,7 @@ class Main:
             # for computing p q
             all_contents_for_pq = []
             for s_id in range(Config.SS):
-                self.storage_ser.send(Config.Read_storage, s_id)  # read commend
+                self.storage_ser.send(Config.Read_storage_For_p, s_id)  # read commend
                 self.storage_ser.send(block_id, s_id)  # read block
                 content_read = self.storage_ser.receive(s_id)
                 all_contents_for_pq.append(content_read)
@@ -222,12 +221,12 @@ class Main:
             print('q_block', len(q_block))
 
             # for writing p q
-            self.storage_ser.send(Config.Write_storage, Config.SS)  # write commend for p
+            self.storage_ser.send(Config.Write_storage_For_p, Config.SS)  # write commend for p
             self.storage_ser.send(block_id, Config.SS)  # write block id
             self.storage_ser.send(p_block, Config.SS)
             self.storage_ser.receive(Config.SS)
 
-            self.storage_ser.send(Config.Write_storage, Config.SS + 1)  # write commend for p
+            self.storage_ser.send(Config.Write_storage_For_p, Config.SS + 1)  # write commend for p
             self.storage_ser.send(block_id, Config.SS + 1)  # write block id
             self.storage_ser.send(q_block, Config.SS + 1)
             self.storage_ser.receive(Config.SS + 1)

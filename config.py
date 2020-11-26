@@ -23,7 +23,9 @@ class Config:
     # commend
     Free_blocks = 'empty block amount'
     Write_storage = 'write storage'
+    Write_storage_For_p = 'write storage for p'
     Read_storage = 'read storage'
+    Read_storage_For_p = 'read storage for p'
     Ping_storage = 'ping storage'
     Delete_block = 'delete block'
 
