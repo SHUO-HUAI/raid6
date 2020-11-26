@@ -109,14 +109,14 @@ class Communication:
             gg = 0
 
             while 1:
-                if gg + 1024 < num:
-                    data = all_data[gg:gg + 1024]
+                if gg + 4096 < num:
+                    data = all_data[gg:gg + 4096]
                     comm.send(data)
                 else:
                     data = all_data[gg:num]
                     comm.send(data)
                     break
-                gg = gg + 1024
+                gg = gg + 4096
                 file_info_size = struct.calcsize('I')
                 buf = comm.recv(file_info_size)
         except BrokenPipeError as e:
@@ -143,14 +143,14 @@ class Communication:
         gg = 0
         while 1:
             try:
-                if gg + 1024 < num:
-                    data = comm.recv(1024)
+                if gg + 4096 < num:
+                    data = comm.recv(4096)
                     all_data = all_data + data
                 else:
                     data = comm.recv(num - gg)
                     all_data = all_data + data
                     break
-                gg = gg + 1024
+                gg = gg + 4096
                 gotten = struct.pack('I', 1)
                 comm.send(gotten)
             except Exception as e:
