@@ -17,7 +17,9 @@ class Communication:
         if not for_user:
             assert len(server_ports) == Config.SN
         else:
-            assert len([server_ports]) == 1
+            if type(server_ports) == int:
+                server_ports = [server_ports]
+                assert len(server_ports) == 1
 
         self.server_ports = server_ports
         self.is_server = is_server
@@ -49,7 +51,10 @@ class Communication:
             except socket.error as msg:
                 print(msg)
                 sys.exit(1)
-            print('all storage are connected')
+            if not for_user:
+                print('all storage are connected')
+            else:
+                print('user is connected')
 
         else:
             assert server_ip is not None
@@ -67,21 +72,21 @@ class Communication:
 
         assert len(self.comm) > 0
 
-    def hock_for_broken(self, broken_ids):  # only can be called by server
+    def hock_for_broken(self, broken_ids):  # only can be called by server for storage
         assert self.is_server
+        assert not self.for_user
         broken_i = 0
         try:
-            if not self.for_user:
-                for server_port_id in range(Config.SN):
-                    if server_port_id in broken_ids:
-                        print('Waiting for another {} storage processes'.format(len(broken_ids) - broken_i))
-                        socketser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                        socketser.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                        socketser.bind((self.my_ip, self.server_ports[server_port_id]))
-                        socketser.listen(1)
-                        conn, addr = socketser.accept()
-                        self.comm[broken_ids[broken_i]] = conn
-                        broken_i = broken_i + 1
+            for server_port_id in range(Config.SN):
+                if server_port_id in broken_ids:
+                    print('Waiting for another {} storage processes'.format(len(broken_ids) - broken_i))
+                    socketser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    socketser.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    socketser.bind((self.my_ip, self.server_ports[server_port_id]))
+                    socketser.listen(1)
+                    conn, addr = socketser.accept()
+                    self.comm[broken_ids[broken_i]] = conn
+                    broken_i = broken_i + 1
         except socket.error as msg:
             print(msg)
             sys.exit(1)
