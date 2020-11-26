@@ -67,7 +67,9 @@ class Storage:
                 if_occupy.append(occupy)
             no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
             # block_id = random.sample(no_occupy_index, 1)[0]
+            print(no_occupy_index)
             block_id = min(no_occupy_index)
+        print(block_id)
 
         block_id = block_id + Config.RBFM + Config.RBFS
 
@@ -193,8 +195,8 @@ if __name__ == '__main__':
 
         elif command == Config.Write_storage:
 
-            contents = Storage_process.com_ser.receive()
             block_id = Storage_process.com_ser.receive()
+            contents = Storage_process.com_ser.receive()
             if block_id != 'None':
                 success = Storage_process.write(contents, block_id)
             else:

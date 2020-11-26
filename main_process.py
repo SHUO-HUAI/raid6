@@ -9,6 +9,9 @@ import struct
 import numpy as np
 from communication import Communication
 
+def bitwise_xor_bytes(a, b):
+    result_int = int.from_bytes(a, byteorder="big") ^ int.from_bytes(b, byteorder="big")
+    return result_int.to_bytes(max(len(a), len(b)), byteorder="big")
 
 class Main:
     def __init__(self, ip, ports_for_storage, port_for_user):
@@ -63,24 +66,28 @@ class Main:
     '''
 
     def parties_renew(self, contents):
-        for c_i in contents:
-            print(c_i)
+
+        for c_i in range(len(contents)):
+            if contents[c_i][0] == b'': # if blank then all zero
+                for _ in range(Config.BS - Config.BFI):
+                    contents[c_i][0] += b'\x00'
+
         blocks = list()
         coeffs = list()
         assert len(contents) == Config.SS  # this line need to be modified when some storage shutdown
         for st_id in range(Config.SS):
             # blocks.append(storages[st_id].read(block_id))  # contents
-            blocks.append(contents[st_id])
+            blocks.append(contents[st_id][0])
             coeffs.append(self.gfilog[st_id])
 
         p_block = list()
         q_block = list()
-        for i in range(Config.BS):
-            p_check = 0
-            q_check = 0
+        for i in range(Config.BS - Config.BFI):
+            p_check = b'\x00'
+            q_check = b'\x00'
             for j in range(Config.SS):
-                data = blocks[j][i]
-                p_check = p_check ^ data
+                data = bytes([blocks[j][i]])
+                p_check = bitwise_xor_bytes(p_check,data)
                 q_check = q_check ^ self._gf_product(data, coeffs[j])
             p_block.append(p_check)
             q_block.append(q_check)
@@ -205,8 +212,8 @@ class Main:
                 content_read = self.storage_ser.receive(s_id)
                 all_contents_for_pq.append(content_read)
             p_block, q_block = self.parties_renew(all_contents_for_pq)
-            print(p_block)
-            print(q_block)
+            print('p_block', len(p_block))
+            print('q_block', len(q_block))
 
             # for writing p q
             self.storage_ser.send(Config.Write_storage, Config.SS)  # write commend for p
