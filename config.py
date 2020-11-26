@@ -21,11 +21,11 @@ class Config:
     SUCC = 1
 
     # commend
-    Free_blocks = 'empty'
-    Write_storage = 'write_sto'
-    Read_storage = 'read_sto'
-    Ping_storage = 'ping_sto'
-    Delete_block = 'delete_block'
+    Free_blocks = 'empty block amount'
+    Write_storage = 'write storage'
+    Read_storage = 'read storage'
+    Ping_storage = 'ping storage'
+    Delete_block = 'delete block'
 
     Write_For_User = 'upload'
     Read_For_User = 'download'
