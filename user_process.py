@@ -10,12 +10,8 @@ from communication import Communication
 
 
 class User:
-    def __init__(self):
-        self.a = 0
-
-    def connect(self, host_ip, port):
-        com_ser = Communication(host_ip, port, is_server=False, for_user=True)
-        return com_ser
+    def __init__(self, host_ip, port):
+        self.com_ser = Communication(host_ip, port, is_server=False, for_user=True)
 
 
 if __name__ == '__main__':

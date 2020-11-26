@@ -9,10 +9,12 @@ import struct
 from communication import Communication
 import numpy as np
 
+
 class Storage:
-    def __init__(self, save_path, init=False):
+    def __init__(self, save_path, host_ip, ports, init=False):
 
         self.save_path = save_path
+        self.com_ser = Communication(host_ip, ports, is_server=False, for_user=False)
 
         if init:
             self.init()
@@ -148,10 +150,6 @@ class Storage:
 
         return block_id
 
-    def connect(self, host_ip, ports):
-        com_ser = Communication(host_ip, ports, is_server=False, for_user=False)
-        return com_ser
-
 
 if __name__ == '__main__':
 
@@ -182,38 +180,37 @@ if __name__ == '__main__':
         print(msg)
         sys.exit(1)
 
-    storage_process = Storage(PATH, init)
-    com_service = storage_process.connect(my_ip, args.storage_port)  # my_ip is used for localhost test
+    storage_process = Storage(PATH, my_ip, args.storage_port, init)
 
     while True:
-        command = com_service.receive()
+        command = storage_process.com_ser.receive()
         print(command)
         if command == Config.Read_storage:
 
-            block_id = com_service.receive()
+            block_id = storage_process.com_ser.receive()
             contents = storage_process.read(block_id)  # return pure content
-            com_service.send(contents)
+            storage_process.com_ser.send(contents)
 
         elif command == Config.Write_storage:
 
-            contents = com_service.receive()
-            block_id = com_service.receive()
+            contents = storage_process.com_ser.receive()
+            block_id = storage_process.com_ser.receive()
             if block_id != 'None':
                 success = storage_process.write(contents, block_id)
             else:
                 success = storage_process.write(contents)
-            com_service.send(success)
+            storage_process.com_ser.send(success)
 
         elif command == Config.Delete_block:
-            block_id = com_service.receive()
+            block_id = storage_process.com_ser.receive()
             success = storage_process.delete(block_id)
-            com_service.send(success)
+            storage_process.com_ser.send(success)
         elif command == Config.Free_blocks:
             free_blocks = storage_process.free_blocks()
-            com_service.send(free_blocks)
+            storage_process.com_ser.send(free_blocks)
         elif command == Config.Ping_storage:
-            com_service.send(1)
+            storage_process.com_ser.send(1)
         else:
-            chaos = com_service.receive()
-            com_service.send(Config.ERROR)
+            chaos = storage_process.com_ser.receive()
+            storage_process.com_ser.send(Config.ERROR)
             raise Exception
