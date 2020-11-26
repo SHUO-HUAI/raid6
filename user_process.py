@@ -62,8 +62,9 @@ if __name__ == '__main__':
                     os.makedirs(folder)
                 file = filename.split('/')[-1]
                 write = open(os.path.join(folder, file), 'wb')
-                for c in all_centent:
-                    write.write(c)
+                # for c in all_centent:
+                write.write(all_centent)
+                write.close()
 
             elif commend == Config.Delete_For_User:
                 pass

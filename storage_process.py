@@ -130,7 +130,7 @@ class Storage:
 
     def read(self, block_ids, record_file_info=False):
 
-        if type(block_ids) == int:
+        if type(block_ids) != list:
             block_ids = [block_ids]
 
         all_content = []

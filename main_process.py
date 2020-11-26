@@ -242,18 +242,16 @@ class Main:
         assert filename in self.all_record_files.keys()
         write_records = self.all_record_files[filename]
         all_content = b''
-        contents_for_parties = []
         for record in write_records:
             storage_id = record[0]
             block_id = record[1]
 
-            for s_id in range(Config.SS):
-                self.storage_ser.send(Config.Read_storage, s_id)
-                self.storage_ser.send(block_id, s_id)
-                content_i = self.storage_ser.receive(s_id)
-                contents_for_parties.append(content_i)
+            self.storage_ser.send(Config.Read_storage_For_p, storage_id)
+            self.storage_ser.send(block_id, storage_id)
+            content_i = self.storage_ser.receive(storage_id)
 
-            content = self.read_with_parties(contents_for_parties, storage_id)
+            length = int(struct.unpack('I', content_i[0][:Config.BFI])[0])
+            content = content_i[0][Config.BFI:length + Config.BFI]
 
             all_content = all_content + content
 
@@ -297,14 +295,11 @@ class Main:
             all_contents_for_recovery = {}
             for s_id in range(Config.SN):
                 if s_id not in broken_ids:
-                    self.storage_ser.send(Config.Free_blocks, s_id)
-                    free_blocks = self.storage_ser.receive(s_id)
                     for block_i in range(Config.BN):
-                        if block_i not in free_blocks and block_i not in range(Config.RBFM, Config.RBFM + Config.RBFS):
-                            self.storage_ser.send(Config.Read_storage, s_id)
-                            self.storage_ser.send(block_i, s_id)
-                            content = self.storage_ser.receive(s_id)
-                            all_contents_for_recovery[[s_id, block_i]] = content
+                        self.storage_ser.send(Config.Read_storage_For_p, s_id)
+                        self.storage_ser.send(block_i, s_id)
+                        content = self.storage_ser.receive(s_id)
+                        all_contents_for_recovery[[s_id, block_i]] = content
 
             all_recover_data = self.recover(broken_ids, all_contents_for_recovery)
             self.storage_ser.hock_for_broken(broken_ids)
@@ -362,6 +357,13 @@ if __name__ == '__main__':
         Main_process.write_finish = True
         Main_process.write(0, name)
         print(Main_process.all_record_files)
+
+        content = Main_process.read("./imgs/test0")
+        write = open('./imgs/read_test.docx', 'wb')
+        # for c in all_centent:
+        write.write(content)
+        write.close()
+        Main_process.delete("./imgs/test0")
 
     # while True:
     #     command = user_com.receive()
