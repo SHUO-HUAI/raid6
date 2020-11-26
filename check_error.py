@@ -61,77 +61,77 @@ class Verifier:
                 coeff_a = coeffs[broken_storage_ids[0]]
                 coeff_b = coeffs[broken_storage_ids[1]]
                 for blk_id in range(Config.BN):
-                    recover_a = []
-                    recover_b = []
+                    recover_a = b''
+                    recover_b = b''
                     for i in range(Config.BS):
                         data_a = b'\x00'
                         data_b = b'\x00'
                         for j in range(Config.SS):
                             if j not in broken_storage_ids:
-                                data_a = bitwise_xor_bytes(data_a, new_contents[[j, blk_id]][i])
-                                data_b = bitwise_xor_bytes(data_b, self._gf_product(new_contents[[j, blk_id]][i],
+                                data_a = bitwise_xor_bytes(data_a, bytes(new_contents[(j, blk_id)][0][i]))
+                                data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes(new_contents[(j, blk_id)][0][i]),
                                                                                     coeffs[j]))
-                                data_b = bitwise_xor_bytes(data_b, self._gf_product(new_contents[[j, blk_id]][i],
+                                data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes(new_contents[(j, blk_id)][0][i]),
                                                                                     coeff_a))
-                        data_b = bitwise_xor_bytes(data_b, self._gf_product(new_contents[[self.p_id, blk_id]][i],
+                        data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes(new_contents[(self.p_id, blk_id)][0][i]),
                                                                             coeff_a))
-                        data_b = bitwise_xor_bytes(data_b, new_contents[[self.q_id, blk_id]][i])
+                        data_b = bitwise_xor_bytes(data_b, bytes(new_contents[(self.q_id, blk_id)][0][i]))
                         data_b = self._gf_div(data_b, bitwise_xor_bytes(coeff_a, coeff_b))
-                        recover_b.append(data_b)
+                        recover_b += data_b
 
                         data_a = bitwise_xor_bytes(data_a, data_b)
-                        data_a = bitwise_xor_bytes(data_a, new_contents[[self.p_id, blk_id]][i])
-                        recover_a.append(data_a)
+                        data_a = bitwise_xor_bytes(data_a, bytes(new_contents[(self.p_id, blk_id)][0][i]))
+                        recover_a += data_a
 
-                    new_contents[[broken_storage_ids[0], blk_id]] = recover_a
-                    new_contents[[broken_storage_ids[1], blk_id]] = recover_b
+                    new_contents[(broken_storage_ids[0], blk_id)] = recover_a
+                    new_contents[(broken_storage_ids[1], blk_id)] = recover_b
 
         return new_contents
 
     def _recover_p(self, contents):
         for blk_id in range(Config.BN):
-            recover_block = []
+            recover_block = b''
             for i in range(Config.BS):
                 p_check = b'\x00'
                 for j in range(Config.SS):
-                    p_check = bitwise_xor_bytes(p_check, contents[[j, blk_id]][i])
-                recover_block.append(p_check)
-            contents[[self.p_id, blk_id]] = recover_block
+                    p_check = bitwise_xor_bytes(p_check, bytes(contents[(j, blk_id)][0][i]))
+                recover_block += p_check
+            contents[(self.p_id, blk_id)] = recover_block
 
     def _recover_q(self, contents, coeffs):
         for blk_id in range(Config.BN):
-            recover_block = []
+            recover_block = b''
             for i in range(Config.BS):
                 q_check = b'\x00'
                 for j in range(Config.SS):
-                    q_check = bitwise_xor_bytes(q_check, self._gf_product(contents[[j, blk_id]][i], coeffs[j]))
-                recover_block.append(q_check)
-            contents[[self.q_id, blk_id]] = recover_block
+                    q_check = bitwise_xor_bytes(q_check, self._gf_product(bytes(contents[(j, blk_id)][0][i]), coeffs[j]))
+                recover_block += q_check
+            contents[(self.q_id, blk_id)] = recover_block
 
     def _recover_data_from_p(self, data_id, contents):
         for blk_id in range(Config.BN):
-            recover_block = []
+            recover_block = b''
             for i in range(Config.BS):
                 data = b'\x00'
                 for j in range(Config.SS):
                     if j != data_id:
-                        data = bitwise_xor_bytes(data, contents[[j, blk_id]][i])
-                data = bitwise_xor_bytes(data, contents[[self.p_id, blk_id]][i])
-                recover_block.append(data)
-            contents[[data_id, blk_id]] = recover_block
+                        data = bitwise_xor_bytes(data, bytes(contents[(j, blk_id)][0][i]))
+                data = bitwise_xor_bytes(data, bytes(contents[(self.p_id, blk_id)][0][i]))
+                recover_block += data
+            contents[(data_id, blk_id)] = recover_block
 
     def _recover_data_from_q(self, data_id, contents, coeffs):
         for blk_id in range(Config.BN):
-            recover_block = []
+            recover_block = b''
             for i in range(Config.BS):
                 data = b'\x00'
                 for j in range(Config.SS):
                     if j != data_id:
-                        data = bitwise_xor_bytes(data, self._gf_product(contents[[j, blk_id]][i], coeffs[j]))
+                        data = bitwise_xor_bytes(data, self._gf_product(bytes(contents[(j, blk_id)][0][i]), coeffs[j]))
                 data = bitwise_xor_bytes(data, contents[self.q_id])
                 data = self._gf_div(data, coeffs[data_id])
-                recover_block.append(data)
-            contents[[data_id, blk_id]] = recover_block
+                recover_block += data
+            contents[(data_id, blk_id)] = recover_block
 
     def _gfilog(self):
         ilog = np.empty(self.gfbound, dtype=np.uint8)
@@ -171,3 +171,31 @@ class Verifier:
                 return coeff
             else:
                 return coeff ^ self.gfbound ^ self.gfbase
+
+    def parties_renew(self, contents):
+
+        for c_i in range(len(contents)):
+            # if contents[c_i][0] == b'':  # if blank then all zero
+            assert len(contents[c_i][0]) == Config.BS
+
+        blocks = list()
+        coeffs = list()
+        assert len(contents) == Config.SS  # this line need to be modified when some storage shutdown
+        for st_id in range(Config.SS):
+            # blocks.append(storages[st_id].read(block_id))  # contents
+            blocks.append(contents[st_id][0])
+            coeffs.append(self.gfilog[st_id])
+
+        p_block = b''
+        q_block = b''
+        for i in range(Config.BS):
+            p_check = b'\x00'
+            q_check = b'\x00'
+            for j in range(Config.SS):
+                data = bytes([blocks[j][i]])
+                p_check = bitwise_xor_bytes(p_check, data)
+                q_check = bitwise_xor_bytes(q_check, self._gf_product(data, coeffs[j]))
+            p_block += p_check
+            q_block += q_check
+
+        return p_block, q_block  # contents

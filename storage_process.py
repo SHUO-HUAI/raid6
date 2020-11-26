@@ -70,18 +70,16 @@ class Storage:
             # block_id = random.sample(no_occupy_index, 1)[0]
             print(no_occupy_index)
             block_id = min(no_occupy_index)
+            block_id = block_id + Config.RBFM + Config.RBFS
         print(block_id)
-
-        block_id = block_id + Config.RBFM + Config.RBFS
 
         # whether used for record file information
         if not record_file_info:
             assert block_id >= Config.RBFM + Config.RBFS
         # else:
-            # assert block_id in range(Config.RBFM)
+        # assert block_id in range(Config.RBFM)
 
         # write contents to block id
-
 
         if not record_file_info:
             path = os.path.join(self.save_path, str(block_id) + '.bin')
@@ -125,6 +123,27 @@ class Storage:
             fw.flush()
             fr.close()
             fw.close()
+
+            # length = struct.pack('I', content_length)
+
+            length = int(struct.unpack('I', contents[:Config.BFI])[0])
+
+            if block_id >= Config.RBFM + Config.RBFS and length > 0:
+                content_id = block_id // each_block_save_num
+                content_data_id = (block_id % each_block_save_num) * Config.BFI
+
+                # record write block in RBFS
+                path = os.path.join(self.save_path, str(Config.RBFM + content_id) + '.bin')
+                fr = open(path, "rb")
+                data = fr.read()
+                fw = open(path, "wb")
+                fw.write(data)
+                record = struct.pack('I', 1)
+                fw.seek(content_data_id)
+                fw.write(record)
+                fw.flush()
+                fr.close()
+                fw.close()
 
         return block_id
 
