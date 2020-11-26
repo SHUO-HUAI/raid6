@@ -61,6 +61,9 @@ class Main:
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
+        #
+        # print((self.gflog[x], self.gflog[coeff], self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]))
+        # input()
         return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]])
 
     def _gf_div(self, x, coeff):
@@ -90,8 +93,8 @@ class Main:
             blocks.append(contents[st_id][0])
             coeffs.append(self.gfilog[st_id])
 
-        p_block = list()
-        q_block = list()
+        p_block = b''
+        q_block = b''
         for i in range(Config.BS - Config.BFI):
             p_check = b'\x00'
             q_check = b'\x00'
@@ -99,8 +102,8 @@ class Main:
                 data = bytes([blocks[j][i]])
                 p_check = bitwise_xor_bytes(p_check, data)
                 q_check = bitwise_xor_bytes(q_check, self._gf_product(data, coeffs[j]))
-            p_block.append(p_check)
-            q_block.append(q_check)
+            p_block += p_check
+            q_block += q_check
 
         return p_block, q_block  # contents
 
