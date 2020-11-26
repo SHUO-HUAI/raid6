@@ -52,7 +52,6 @@ if __name__ == '__main__':
                     else:
                         all_content.append(content1)
                 read_b.close()
-                User_process.com_ser.send(commend)
                 User_process.com_ser.send(all_content)
 
             elif commend == Config.Read_For_User:
@@ -79,7 +78,6 @@ if __name__ == '__main__':
                     else:
                         all_content.append(content1)
                 read_b.close()
-                User_process.com_ser.send(commend)
                 User_process.com_ser.send(all_content)
             else:
                 print('unknown commend, support only:', Config.Write_For_User, Config.Read_For_User,
