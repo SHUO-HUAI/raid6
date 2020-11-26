@@ -23,6 +23,7 @@ class Main:
         user_com_ser = None
         self.storage_ser = storage_com_ser
         self.usr_com = user_com_ser
+        self.ports_for_storage = ports_for_storage
 
         self.write_finish = False  # used for record a file if finishing writing
         self.write_record_tmp = []  # used for tmp save write information
@@ -167,6 +168,7 @@ class Main:
         # every time write a block to a storage for balance
         # the last time for writing a file will record its information
         # need to be done: p q
+        self.ping()
         assert not self.write_finish or filename is not None
 
         if not self.write_finish:
@@ -181,8 +183,9 @@ class Main:
             storage_id = free_blocks_each_stroage.argmax()  # save content to the most empty storage
             print(storage_id)
 
-            self.storage_ser.send(Config.Write_storage, storage_id)
-            self.storage_ser.send(content, storage_id)
+            self.storage_ser.send(Config.Write_storage, storage_id)  # write commend
+            self.storage_ser.send('None', storage_id)  # block id
+            self.storage_ser.send(content, storage_id)  # content
             block_id = self.storage_ser.receive(storage_id)
             assert block_id != Config.ERROR
             self.write_record_tmp.append([storage_id, block_id])
@@ -198,6 +201,16 @@ class Main:
             print(p_block)
             print(q_block)
 
+            # for writing p q
+            self.storage_ser.send(Config.Write_storage, Config.SS)  # write commend for p
+            self.storage_ser.send(block_id, Config.SS)  # write block id
+            self.storage_ser.send(p_block, Config.SS)
+            self.storage_ser.receive(Config.SS)
+
+            self.storage_ser.send(Config.Write_storage, Config.SS + 1)  # write commend for p
+            self.storage_ser.send(block_id, Config.SS + 1)  # write block id
+            self.storage_ser.send(q_block, Config.SS + 1)
+            self.storage_ser.receive(Config.SS + 1)
 
         else:
             assert filename not in self.all_record_files.keys()
@@ -213,6 +226,20 @@ class Main:
 
     def modify(self, filename):
         pass
+
+    def ping(self):
+        # ping is used to guarantee all storage is connected
+        broken_ids = []
+        for s_id in range(Config.SN):
+            SUCC = self.storage_ser.send(Config.Ping_storage, s_id)
+            if SUCC:
+                self.storage_ser.receive(s_id)
+                print(str(s_id) + ' is alive')
+            else:
+                print(str(s_id) + ' is shutdown')
+                broken_ids.append(s_id)
+        if len(broken_ids) > 0:
+            self.storage_ser.hock_for_broken(broken_ids)
 
 
 if __name__ == '__main__':

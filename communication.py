@@ -19,6 +19,10 @@ class Communication:
         else:
             assert len([server_ports]) == 1
 
+        self.server_ports = server_ports
+        self.is_server = is_server
+        self.for_user = for_user
+
         if is_server:
             self.comm = []
             try:
@@ -30,6 +34,7 @@ class Communication:
             except socket.error as msg:
                 print(msg)
                 sys.exit(1)
+            self.my_ip = my_ip
 
             try:
                 for server_port in server_ports:
@@ -61,6 +66,27 @@ class Communication:
                         exit()
 
         assert len(self.comm) > 0
+
+    def hock_for_broken(self, broken_ids):  # only can be called by server
+        assert self.is_server
+        broken_i = 0
+        try:
+            if not self.for_user:
+                for server_port_id in range(Config.SN):
+                    if server_port_id in broken_ids:
+                        print('Waiting for another {} storage processes'.format(len(broken_ids) - broken_i))
+                        socketser = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        socketser.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                        socketser.bind((self.my_ip, self.server_ports[server_port_id]))
+                        socketser.listen(1)
+                        conn, addr = socketser.accept()
+                        self.comm[broken_ids[broken_i]] = conn
+                        broken_i = broken_i + 1
+        except socket.error as msg:
+            print(msg)
+            sys.exit(1)
+        assert broken_i == len(broken_ids)
+        print('all storage are connected')
 
     # storage id is used by main process to identify which storage process to write in.
     # for storage process, as it is client, it only connect to a server, so no storage id is needed

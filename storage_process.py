@@ -187,6 +187,7 @@ if __name__ == '__main__':
 
     while True:
         command = com_service.receive()
+        print(command)
         if command == Config.Read_storage:
 
             block_id = com_service.receive()
@@ -196,7 +197,11 @@ if __name__ == '__main__':
         elif command == Config.Write_storage:
 
             contents = com_service.receive()
-            success = storage_process.write(contents)
+            block_id = com_service.receive()
+            if block_id != 'None':
+                success = storage_process.write(contents,block_id)
+            else:
+                success = storage_process.write(contents)
             com_service.send(success)
 
         elif command == 'delete':
@@ -206,6 +211,8 @@ if __name__ == '__main__':
         elif command == Config.Free_blocks:
             free_blocks = storage_process.free_blocks()
             com_service.send(free_blocks)
+        elif command == Config.Ping_storage:
+            com_service.send(1)
         else:
             chaos = com_service.receive()
             com_service.send(Config.ERROR)
