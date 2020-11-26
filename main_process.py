@@ -163,6 +163,13 @@ class Main:
                 recover1.append(data1)
             return [recover1, recover2]
 
+    def recover(self, broken_storage_ids, all_contents: dict):
+        return {}
+
+    def read_with_parties(self, all_contents, storage_id):
+        return b''
+        # return a content after verifying
+
     def write(self, content, filename=None):
         # need to determine which storage save this content
         # every time write a block to a storage for balance
@@ -176,7 +183,7 @@ class Main:
             for s_id in range(Config.SS):
                 self.storage_ser.send(Config.Free_blocks, s_id)
                 free_blocks = self.storage_ser.receive(s_id)
-                free_blocks_each_stroage.append(free_blocks)
+                free_blocks_each_stroage.append(len(free_blocks))
             free_blocks_each_stroage = np.array(free_blocks_each_stroage)
 
             print(free_blocks_each_stroage)
@@ -219,7 +226,26 @@ class Main:
             self.write_finish = False
 
     def read(self, filename):
-        pass
+        self.ping()
+        assert filename in self.all_record_files.keys()
+        write_records = self.all_record_files[filename]
+        all_content = b''
+        contents_for_parties = []
+        for record in write_records:
+            storage_id = record[0]
+            block_id = record[1]
+
+            for s_id in range(Config.SS):
+                self.storage_ser.send(Config.Read_storage, s_id)
+                self.storage_ser.send(block_id, s_id)
+                content_i = self.storage_ser.receive(s_id)
+                contents_for_parties.append(content_i)
+
+            content = self.read_with_parties(contents_for_parties, storage_id)
+
+            all_content = all_content + content
+
+        return all_content
 
     def delete(self, filename):
         pass
@@ -232,14 +258,37 @@ class Main:
         broken_ids = []
         for s_id in range(Config.SN):
             SUCC = self.storage_ser.send(Config.Ping_storage, s_id)
-            if SUCC:
+            if SUCC == Config.SUCC:
                 self.storage_ser.receive(s_id)
                 print(str(s_id) + ' is alive')
             else:
                 print(str(s_id) + ' is shutdown')
                 broken_ids.append(s_id)
+
         if len(broken_ids) > 0:
+            all_contents_for_recovery = {}
+            for s_id in range(Config.SN):
+                if s_id not in broken_ids:
+                    self.storage_ser.send(Config.Free_blocks, s_id)
+                    free_blocks = self.storage_ser.receive(s_id)
+                    for block_i in range(Config.BN):
+                        if block_i not in free_blocks and block_i not in range(Config.RBFM, Config.RBFM + Config.RBFS):
+                            self.storage_ser.send(Config.Read_storage, s_id)
+                            self.storage_ser.send(block_i, s_id)
+                            content = self.storage_ser.receive(s_id)
+                            all_contents_for_recovery[[s_id, block_i]] = content
+
+            all_recover_data = self.recover(broken_ids, all_contents_for_recovery)
             self.storage_ser.hock_for_broken(broken_ids)
+
+            for key in all_recover_data.keys():
+                storage_id = key[0]
+                block_id = key[1]
+                self.storage_ser.send(Config.Write_storage, storage_id)
+                self.storage_ser.send(all_recover_data[[storage_id, block_id]], storage_id)
+                self.storage_ser.send(block_id, storage_id)
+                block_id = self.storage_ser.receive(storage_id)
+                print(block_id)
 
 
 if __name__ == '__main__':

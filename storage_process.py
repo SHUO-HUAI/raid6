@@ -7,7 +7,7 @@ from datetime import datetime
 from config import Config
 import struct
 from communication import Communication
-
+import numpy as np
 
 class Storage:
     def __init__(self, save_path, init=False):
@@ -41,7 +41,7 @@ class Storage:
                 struct.unpack('I', all_content[content_id][content_data_id:content_data_id + Config.BFI])[0])
             if_occupy.append(occupy)
         no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
-        return len(no_occupy_index)
+        return no_occupy_index
 
     def write(self, contents, block_id=None, record_file_info=False):
 
@@ -64,8 +64,8 @@ class Storage:
                     struct.unpack('I', all_content[content_id][content_data_id:content_data_id + Config.BFI])[0])
                 if_occupy.append(occupy)
             no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
-            # print(no_occupy_index)
-            block_id = random.sample(no_occupy_index, 1)[0]
+            # block_id = random.sample(no_occupy_index, 1)[0]
+            block_id = min(no_occupy_index)
 
         block_id = block_id + Config.RBFM + Config.RBFS
 
@@ -199,7 +199,7 @@ if __name__ == '__main__':
             contents = com_service.receive()
             block_id = com_service.receive()
             if block_id != 'None':
-                success = storage_process.write(contents,block_id)
+                success = storage_process.write(contents, block_id)
             else:
                 success = storage_process.write(contents)
             com_service.send(success)
