@@ -81,9 +81,9 @@ class Main:
     def parties_renew(self, contents):
 
         for c_i in range(len(contents)):
-            if contents[c_i][0] == b'':  # if blank then all zero
-                for _ in range(Config.BS - Config.BFI):
-                    contents[c_i][0] += b'\x00'
+            # if contents[c_i][0] == b'':  # if blank then all zero
+            for _ in range(Config.BS - Config.BFI - len(contents[c_i][0])):
+                contents[c_i][0] += b'\x00'
 
         blocks = list()
         coeffs = list()
