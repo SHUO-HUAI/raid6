@@ -9,9 +9,11 @@ import struct
 import numpy as np
 from communication import Communication
 
+
 def bitwise_xor_bytes(a, b):
     result_int = int.from_bytes(a, byteorder="big") ^ int.from_bytes(b, byteorder="big")
     return result_int.to_bytes(max(len(a), len(b)), byteorder="big")
+
 
 class Main:
     def __init__(self, ip, ports_for_storage, port_for_user):
@@ -68,7 +70,7 @@ class Main:
     def parties_renew(self, contents):
 
         for c_i in range(len(contents)):
-            if contents[c_i][0] == b'': # if blank then all zero
+            if contents[c_i][0] == b'':  # if blank then all zero
                 for _ in range(Config.BS - Config.BFI):
                     contents[c_i][0] += b'\x00'
 
@@ -87,7 +89,7 @@ class Main:
             q_check = b'\x00'
             for j in range(Config.SS):
                 data = bytes([blocks[j][i]])
-                p_check = bitwise_xor_bytes(p_check,data)
+                p_check = bitwise_xor_bytes(p_check, data)
                 q_check = q_check ^ self._gf_product(data, coeffs[j])
             p_block.append(p_check)
             q_block.append(q_check)
