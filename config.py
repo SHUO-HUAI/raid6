@@ -26,3 +26,8 @@ class Config:
     Read_storage = 'read_sto'
     Ping_storage = 'ping_sto'
     Delete_block = 'delete_block'
+
+    Write_For_User = 'upload'
+    Read_For_User = 'download'
+    Delete_For_User = 'delete'
+    Modify_For_User = 'modify'

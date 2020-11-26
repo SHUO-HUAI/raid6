@@ -248,11 +248,12 @@ class Main:
         return all_content
 
     def delete(self, filename):
+        # no need to modify the content in original storage block
+        # because in read, that block still can be read out for verifying, its length is not zero
+        # in write, this block will be used again and p q value will be updated automatically
         self.ping()
         assert filename in self.all_record_files.keys()
         write_records = self.all_record_files[filename]
-        # all_content = b''
-        contents_for_parties = []
         for record in write_records:
             storage_id = record[0]
             block_id = record[1]
@@ -261,6 +262,7 @@ class Main:
             self.storage_ser.send(block_id, storage_id)
             SUCC = self.storage_ser.receive(storage_id)
             assert SUCC != Config.ERROR
+        self.all_record_files.pop(filename)
 
     def modify(self, content, filename):
         # delete and write, as write commend need to be called more than one times. so this method will implement

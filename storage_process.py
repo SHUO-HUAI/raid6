@@ -180,37 +180,37 @@ if __name__ == '__main__':
         print(msg)
         sys.exit(1)
 
-    storage_process = Storage(PATH, my_ip, args.storage_port, init)
+    Storage_process = Storage(PATH, my_ip, args.storage_port, init)
 
     while True:
-        command = storage_process.com_ser.receive()
+        command = Storage_process.com_ser.receive()
         print(command)
         if command == Config.Read_storage:
 
-            block_id = storage_process.com_ser.receive()
-            contents = storage_process.read(block_id)  # return pure content
-            storage_process.com_ser.send(contents)
+            block_id = Storage_process.com_ser.receive()
+            contents = Storage_process.read(block_id)  # return pure content
+            Storage_process.com_ser.send(contents)
 
         elif command == Config.Write_storage:
 
-            contents = storage_process.com_ser.receive()
-            block_id = storage_process.com_ser.receive()
+            contents = Storage_process.com_ser.receive()
+            block_id = Storage_process.com_ser.receive()
             if block_id != 'None':
-                success = storage_process.write(contents, block_id)
+                success = Storage_process.write(contents, block_id)
             else:
-                success = storage_process.write(contents)
-            storage_process.com_ser.send(success)
+                success = Storage_process.write(contents)
+            Storage_process.com_ser.send(success)
 
         elif command == Config.Delete_block:
-            block_id = storage_process.com_ser.receive()
-            success = storage_process.delete(block_id)
-            storage_process.com_ser.send(success)
+            block_id = Storage_process.com_ser.receive()
+            success = Storage_process.delete(block_id)
+            Storage_process.com_ser.send(success)
         elif command == Config.Free_blocks:
-            free_blocks = storage_process.free_blocks()
-            storage_process.com_ser.send(free_blocks)
+            free_blocks = Storage_process.free_blocks()
+            Storage_process.com_ser.send(free_blocks)
         elif command == Config.Ping_storage:
-            storage_process.com_ser.send(1)
+            Storage_process.com_ser.send(1)
         else:
-            chaos = storage_process.com_ser.receive()
-            storage_process.com_ser.send(Config.ERROR)
+            chaos = Storage_process.com_ser.receive()
+            Storage_process.com_ser.send(Config.ERROR)
             raise Exception
