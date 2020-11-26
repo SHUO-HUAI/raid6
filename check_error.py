@@ -176,6 +176,7 @@ class Verifier:
 
         for c_i in range(len(contents)):
             # if contents[c_i][0] == b'':  # if blank then all zero
+            print(len(contents[c_i]))
             assert len(contents[c_i][0]) == Config.BS
 
         blocks = list()
