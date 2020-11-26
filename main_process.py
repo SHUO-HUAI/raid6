@@ -45,22 +45,30 @@ class Main:
                 return coeff ^ self.gfbound ^ self.gfbase
 
     def _gfilog(self):
-        ilog = np.zeros(self.gfbound)
+        ilog = np.empty(self.gfbound, dtype=np.uint8)
         for idx in range(self.gfbound - 1):
             ilog[idx] = self.coefficient(idx)
         return ilog
 
     def _gflog(self):
-        log = np.zeros(self.gfbound)
+        log = np.empty(self.gfbound, dtype=np.uint8)
         for idx in range(self.gfbound):
             log[int(self.gfilog[idx])] = idx
         return log
 
-    def _gf_product(self, x, k):
-        return self.gfilog[(self.gflog[x] + self.gflog[k]) // 255]
+    def _gf_product(self, x, coeff):
+        if isinstance(x, bytes):
+            x = int.from_bytes(x, byteorder="big")
+        if isinstance(coeff, bytes):
+            coeff = int.from_bytes(coeff, byteorder="big")
+        return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) // 255]])
 
-    def _gf_div(self, x, k):
-        return self.gfilog[(self.gflog[x] - self.gflog[k] + 255) // 255]
+    def _gf_div(self, x, coeff):
+        if isinstance(x, bytes):
+            x = int.from_bytes(x, byteorder="big")
+        if isinstance(coeff, bytes):
+            coeff = int.from_bytes(coeff, byteorder="big")
+        return bytes([self.gfilog[(self.gflog[x] - self.gflog[coeff] + 255) // 255]])
 
     '''
     inputs: storages: lists of all storage processes; block_id: the block_id to write data
@@ -90,7 +98,7 @@ class Main:
             for j in range(Config.SS):
                 data = bytes([blocks[j][i]])
                 p_check = bitwise_xor_bytes(p_check, data)
-                q_check = q_check ^ self._gf_product(data, coeffs[j])
+                q_check = bitwise_xor_bytes(q_check, self._gf_product(data, coeffs[j]))
             p_block.append(p_check)
             q_block.append(q_check)
 
