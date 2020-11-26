@@ -61,6 +61,7 @@ class Main:
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
+            print((self.gflog[x], self.gflog[coeff], self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]))
         return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]])
 
     def _gf_div(self, x, coeff):
