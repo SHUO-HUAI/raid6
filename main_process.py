@@ -18,10 +18,10 @@ def bitwise_xor_bytes(a, b):
 class Main:
     def __init__(self, ip, ports_for_storage, port_for_user):
         self.a = 0
-        self.gfbase = 29
-        self.gfbound = 2 ** 8
-        self.gfilog = self._gfilog()
-        self.gflog = self._gflog()
+        # self.gfbase = 29
+        # self.gfbound = 2 ** 8
+        # self.gfilog = self._gfilog()
+        # self.gflog = self._gflog()
 
         storage_com_ser = Communication(ip, ports_for_storage, is_server=True, for_user=False)
         # user_com_ser = Communication(ip, port_for_user, is_server=True, for_user=True)
@@ -34,6 +34,7 @@ class Main:
         self.write_record_tmp = []  # used for tmp save write information
         self.all_record_files = {}  # record all save files, including the filename and storage location, save down when shutdown
 
+    '''
     def coefficient(self, index):
         if 2 ** index < self.gfbound:
             return 2 ** index
@@ -70,12 +71,12 @@ class Main:
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
         return bytes([self.gfilog[(self.gflog[x] - self.gflog[coeff] + 255) % 255]])
-
+    '''
     '''
     inputs: storages: lists of all storage processes; block_id: the block_id to write data
     outputs: p_block: renewed block (corresponding to block_id) of P party; q_block renewed block of Q party 
     '''
-
+    '''
     def parties_renew(self, contents):
 
         for c_i in range(len(contents)):
@@ -104,12 +105,12 @@ class Main:
             q_block.append(q_check)
 
         return p_block, q_block  # contents
-
+    '''
     '''
     input: storages: ...; corrupt_id: the storage process you use; block_id: the block you read
     output:  recover_block: recovered data block
     '''
-
+    '''
     def read_recover(self, storages, corrupt_id, block_id):
         blocks = list()
         # for P party
@@ -180,6 +181,7 @@ class Main:
                 data1 ^= data2 ^ p_block[i]
                 recover1.append(data1)
             return [recover1, recover2]
+    '''
 
     def write(self, content, filename=None):
         # need to determine which storage save this content
