@@ -51,11 +51,17 @@ if __name__ == '__main__':
                         break
                     else:
                         all_content.append(content1)
+                    # print('read.....')
                 read_b.close()
                 User_process.com_ser.send(all_content)
+                User_process.com_ser.receive()
+                print('Upload Done')
 
             elif commend == Config.Read_For_User:
                 all_centent = User_process.com_ser.receive()
+                if all_centent == Config.ERROR:
+                    print('no such file')
+                    raise FileNotFoundError
                 folder = './download_from_server'
                 if not os.path.exists(folder):
                     os.makedirs(folder)
@@ -64,6 +70,7 @@ if __name__ == '__main__':
                 # for c in all_centent:
                 write.write(all_centent)
                 write.close()
+                print('Download Done')
 
             elif commend == Config.Delete_For_User:
                 pass

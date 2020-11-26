@@ -366,37 +366,42 @@ if __name__ == '__main__':
     #     Main_process.delete("./imgs/test0")
 
     while True:
-        command = Main_process.user_com.receive()
-        filename = Main_process.user_com.receive()
-        if command == Config.Write_For_User:
-            contents = Main_process.user_com.receive()
-            Main_process.write_finish = False
+        try:
+            command = Main_process.user_com.receive()
+            filename = Main_process.user_com.receive()
+            if command == Config.Write_For_User:
+                contents = Main_process.user_com.receive()
+                Main_process.write_finish = False
 
-            for content1 in contents:
-                Main_process.write(content1)
+                for content1 in contents:
+                    Main_process.write(content1)
 
-            Main_process.write_finish = True
-            Main_process.write(0, filename)
+                Main_process.write_finish = True
+                Main_process.write(0, filename)
+                Main_process.user_com.send(Config.SUCC)
 
-        elif command == Config.Read_For_User:
-            content = Main_process.read(filename)
-            Main_process.user_com.send(content)
+            elif command == Config.Read_For_User:
+                content = Main_process.read(filename)
+                Main_process.user_com.send(content)
 
-        elif command == Config.Delete_For_User:
-            Main_process.delete(filename)
+            elif command == Config.Delete_For_User:
+                Main_process.delete(filename)
 
-        elif command == Config.Modify_For_User:
-            Main_process.delete(filename)
+            elif command == Config.Modify_For_User:
+                Main_process.delete(filename)
 
-            contents = Main_process.user_com.receive()
-            Main_process.write_finish = False
+                contents = Main_process.user_com.receive()
+                Main_process.write_finish = False
 
-            for content1 in contents:
-                Main_process.write(content1)
+                for content1 in contents:
+                    Main_process.write(content1)
 
-            Main_process.write_finish = True
-            Main_process.write(0, filename)
+                Main_process.write_finish = True
+                Main_process.write(0, filename)
 
-        else:
-            chaos = Main_process.user_com.receive()
-            raise Exception
+            else:
+                chaos = Main_process.user_com.receive()
+                raise Exception
+        except Exception as e:
+            print(e)
+            Main_process.user_com.send(Config.ERROR)
