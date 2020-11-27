@@ -2,28 +2,45 @@
 This repository is used for the RAID 6 project for CE7490 Advanced Topics in Distributed Systems.
 
 ## Instructions
-This code is developed under Ubuntu 16.04 x64 OS and Python 3.5 Development Environment. 
-## Process 1 (Main Process)
-This process is used for maintaining the RAID6 system, it runs all the time. When it begins, it will wait for all storage processes (N, including _S_ for storage and _P_ for parities) start and build communications with them. In the initial, it will randomly set parities blocks in the same block index among all storage processes.
+This code is developed under Ubuntu 16.04 x64 OS and Python 3.5 Development Environment. The package we only require is NumPy-1.17.2. Next, you can clone this
+repository.
+> git clone git@github.com:Shaowen310/raid6.git \
+> cd raid6
 
-Then it will wait for user processes to connect it and user processes will send commands (upload, download, modify, delete) to this main process.
+Then there are three *_process.py files for a different function. Storage process and User process will interaction will the Main process. So you can run these three
+files on different machines, only need to know the IP of Main process.
+
+Run Main process by:
+> python main_process.py --some_configs
+>
+Then you need to start N storage process, N is defined in config.py, each storage process is executed by the following command:
+> python storage_process.py --some_configs
+
+Finally, you can use User process for saving and reading data from the RAID 6 system by:
+> python user_process.py --some_configs
+
+And the commands for user are following:
 >upload _filename_ \
 >download _filename_ \
 >modity _filename_ \
 >delete _filename_
 
-It has a file name list to reverse which file is saved in this system. And each file name can refer to a list to indicate which storage process and which block saves this file （这里有问题，因为文件系统的话，所有东西都必须存储在文件系统里面，所以是不存在这些链表的。应该用一块保留区去存取这些东西，那个冗余纠错用的哪个block一起保存， ：Nov08已完成）. It will send the write, read, delete commands to the storage processes （简单起见，更改命令先用删除旧的和创建新的代替）. For upload, the main processes will divide a file to some parts and each part is some times of block size and then it sends each part to a storage process (rank by blank space). Then it will calculate the parities and write parities. For delete, it also needs to modify the parities. For download, it needs to combine all data from each storage process.
-
-## Process 2 (Storage Process) Done: Nov08
-This process is used to save data in binary formate. It has _B_ blocks and each block has _K_ Bytes (8*bits). Each block's first _n_ is used to save how many occupied bits in this block. It has a block to save which block has been used. For the write command, it will find a block to write the content in and return the block index (unsuccessful, return -1). For the read command, it will return the content in binary by the block index. For the delete command,  it will set this block to unused and return the index for the main process to modify parities.
-
-## Process 3 (User Process)
-This process is used by some users, we can use it to upload, download, delete files.
-
-## For Communication Done: Nov08
-As it needs to support multiple machines, we may use network communication (socket?) among all processes.
-
-## For Storage Processes shutdown
-The main process will trigger the erasure codes to repair the data （根据课上的内容进行）.
-
-![avatar](https://raw.githubusercontent.com/Shaowen310/raid6/main/imgs/read.png?token=ANCBBUKLP4HVGJWPJR6ZNPC7U6Z6Y)
+## Features
+- File system operations:
+    - Read
+    - Write
+    - Delete
+    - Modify
+- RAID 6 operations:
+    - Two parities blocks
+    - Recover broken <= 2 disks
+    - Find which storage is failed by network connection and parities
+    - Support n+2 configurations, n for storage, 2 for parities
+-  Data structure:
+    - Any size of data and any type of data
+    - Binary storage is used
+    - A list is used to map the filename to its location, mutable files
+    - Fixed-size of binary files to simulate physical storage blocks
+- Network Storage:
+    - Support each storage process is on a different machine
+    - Socket technique is used
