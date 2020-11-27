@@ -1,4 +1,4 @@
-# raid6
+# RAID 6
 This repository is used for the RAID 6 project for CE7490 Advanced Topics in Distributed Systems.
 
 ## Instructions
@@ -7,7 +7,7 @@ repository.
 > git clone git@github.com:Shaowen310/raid6.git \
 > cd raid6
 
-Then there are three *_process.py files for a different function. Storage process and User process will interaction will the Main process. So you can run these three
+Then there are three *_process.py files for different functions. Storage process and User process will interaction will the Main process. So you can run these three
 files on different machines, only need to know the IP of Main process.
 
 Run Main process by:
