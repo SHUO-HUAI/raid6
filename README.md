@@ -1,12 +1,15 @@
 # raid6
+This repository is used for the RAID 6 project for CE7490 Advanced Topics in Distributed Systems.
 
+## Instructions
+This code is developed under Ubuntu 16.04 x64 OS and Python 3.5 Development Environment. 
 ## Process 1 (Main Process)
 This process is used for maintaining the RAID6 system, it runs all the time. When it begins, it will wait for all storage processes (N, including _S_ for storage and _P_ for parities) start and build communications with them. In the initial, it will randomly set parities blocks in the same block index among all storage processes.
 
 Then it will wait for user processes to connect it and user processes will send commands (upload, download, modify, delete) to this main process.
 >upload _filename_ \
 >download _filename_ \
->modity _filename_ _new\_filename_ \
+>modity _filename_ \
 >delete _filename_
 
 It has a file name list to reverse which file is saved in this system. And each file name can refer to a list to indicate which storage process and which block saves this file （这里有问题，因为文件系统的话，所有东西都必须存储在文件系统里面，所以是不存在这些链表的。应该用一块保留区去存取这些东西，那个冗余纠错用的哪个block一起保存， ：Nov08已完成）. It will send the write, read, delete commands to the storage processes （简单起见，更改命令先用删除旧的和创建新的代替）. For upload, the main processes will divide a file to some parts and each part is some times of block size and then it sends each part to a storage process (rank by blank space). Then it will calculate the parities and write parities. For delete, it also needs to modify the parities. For download, it needs to combine all data from each storage process.

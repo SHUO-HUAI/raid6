@@ -34,6 +34,7 @@ class Verifier:
             # data storage
             if broken_id < Config.SS:
                 self._recover_data_from_p(broken_id, new_contents)
+                # self._recover_data_from_q(broken_id,new_contents,coeffs)
             # P storage
             elif broken_id == self.p_id:
                 self._recover_p(new_contents)
@@ -171,7 +172,7 @@ class Verifier:
         if x == 0 or coeff == 0:
             return bytes([0])
         else:
-            return bytes([self.gfilog[int(self.gflog[x]) - int(self.gflog[coeff]) % 255]])
+            return bytes([self.gfilog[(int(self.gflog[x]) - int(self.gflog[coeff])) % 255]])
 
     def coefficient(self, index):
         if 2 ** index < self.gfbound:
@@ -183,12 +184,13 @@ class Verifier:
             else:
                 return coeff ^ self.gfbound ^ self.gfbase
 
-    def parties_renew(self, contents):
+    def parties_renew(self, contents, test=False):
+        if not test:
 
-        for c_i in range(len(contents)):
-            # if contents[c_i][0] == b'':  # if blank then all zero
-            # print(len(contents[c_i]))
-            assert len(contents[c_i][0]) == Config.BS
+            for c_i in range(len(contents)):
+                # if contents[c_i][0] == b'':  # if blank then all zero
+                # print(len(contents[c_i]))
+                assert len(contents[c_i][0]) == Config.BS
 
         blocks = list()
         coeffs = list()
@@ -211,3 +213,26 @@ class Verifier:
             q_block += q_check
 
         return p_block, q_block  # contents
+
+
+if __name__ == '__main__':
+    # a = b'\x00?\x00\x00PK\x03\x04\x14\x00\x06\x00\x08\x00\x00\x00!\x002\x91oWf\x01\x00\x00\xa5\x05\x00\x00\x13\x00\x08\x02[Content_Types].xml \xa2\x04\x02(\xa0\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    # b = b'l\x03\x00\x00\xc2\xd1&L/I\xfe\x04\x00\x00\xff\xff\x03\x00PK\x01\x02-\x00\x14\x00\x06\x00\x08\x00\x00\x00!\x002\x91oWf\x01\x00\x00\xa5\x05\x00\x00\x13\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00[Content_Types].xml'
+    a = b'\x00'
+    b = b'l'
+    Config.BS = len(a)
+    Config.SN = 4
+    Config.SS = 2
+    Config.BN = 1
+
+    check_error = Verifier()
+    p, q = check_error.parties_renew([[a], [b]], True)
+
+    print(p.hex())
+    print(q.hex())
+
+    all_dic = {(2, 0): [p], (3, 0): [q]}
+
+    new_content = check_error.recover([0, 1], all_dic)
+
+    print(new_content)
