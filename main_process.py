@@ -20,9 +20,9 @@ class Main:
     def __init__(self, ip, ports_for_storage, port_for_user):
 
         storage_com_ser = Communication(ip, ports_for_storage, is_server=True, for_user=False)
-        # user_com_ser = Communication(ip, port_for_user, is_server=True, for_user=True)
+        user_com_ser = Communication(ip, port_for_user, is_server=True, for_user=True)
         self.check_error = check_error.Verifier()
-        user_com_ser = None
+        # user_com_ser = None
         self.storage_ser = storage_com_ser
         self.user_com = user_com_ser
         self.ports_for_storage = ports_for_storage
@@ -194,27 +194,27 @@ if __name__ == '__main__':
     # then it will wait user process to connect, then it will listen to user's command
     # storage_com, user_com = Main_process.connect(my_ip, args.storage_port, args.user_port)
     Main_process = Main(my_ip, args.storage_port, args.user_port)
-    i = 0
-    while True:
-        k = input()
-        if int(k) == 0:
-            break
-
-        read_b = open("./imgs/Distributed system project 2020.docx", "rb")
-        Main_process.write_finish = False
-        name = "./imgs/test" + str(i)
-        while True:
-            content1 = read_b.read(Config.BS - Config.BFI)  # a content is a block size - information size
-            if len(content1) == 0:
-                break
-            else:
-                Main_process.write(content1)
-        read_b.close()
-
-        i = i + 1
-        Main_process.write_finish = True
-        Main_process.write(0, name)
-        print(Main_process.all_record_files)
+    # i = 0
+    # while True:
+    #     k = input()
+    #     if int(k) == 0:
+    #         break
+    #
+    #     read_b = open("./imgs/Distributed system project 2020.docx", "rb")
+    #     Main_process.write_finish = False
+    #     name = "./imgs/test" + str(i)
+    #     while True:
+    #         content1 = read_b.read(Config.BS - Config.BFI)  # a content is a block size - information size
+    #         if len(content1) == 0:
+    #             break
+    #         else:
+    #             Main_process.write(content1)
+    #     read_b.close()
+    #
+    #     i = i + 1
+    #     Main_process.write_finish = True
+    #     Main_process.write(0, name)
+    #     print(Main_process.all_record_files)
 
         # content = Main_process.read("./imgs/test0")
         # write = open('./imgs/read_test.docx', 'wb')
@@ -223,43 +223,43 @@ if __name__ == '__main__':
         # write.close()
         # Main_process.delete("./imgs/test0")
 
-    # while True:
-    #     try:
-    #         command = Main_process.user_com.receive()
-    #         filename = Main_process.user_com.receive()
-    #         if command == Config.Write_For_User:
-    #             contents = Main_process.user_com.receive()
-    #             Main_process.write_finish = False
-    #
-    #             for content1 in contents:
-    #                 Main_process.write(content1)
-    #
-    #             Main_process.write_finish = True
-    #             Main_process.write(0, filename)
-    #             Main_process.user_com.send(Config.SUCC)
-    #
-    #         elif command == Config.Read_For_User:
-    #             content = Main_process.read(filename)
-    #             Main_process.user_com.send(content)
-    #
-    #         elif command == Config.Delete_For_User:
-    #             Main_process.delete(filename)
-    #
-    #         elif command == Config.Modify_For_User:
-    #             Main_process.delete(filename)
-    #
-    #             contents = Main_process.user_com.receive()
-    #             Main_process.write_finish = False
-    #
-    #             for content1 in contents:
-    #                 Main_process.write(content1)
-    #
-    #             Main_process.write_finish = True
-    #             Main_process.write(0, filename)
-    #
-    #         else:
-    #             chaos = Main_process.user_com.receive()
-    #             raise Exception
-    #     except Exception as e:
-    #         print(e)
-    #         Main_process.user_com.send(Config.ERROR)
+    while True:
+        try:
+            command = Main_process.user_com.receive()
+            filename = Main_process.user_com.receive()
+            if command == Config.Write_For_User:
+                contents = Main_process.user_com.receive()
+                Main_process.write_finish = False
+
+                for content1 in contents:
+                    Main_process.write(content1)
+
+                Main_process.write_finish = True
+                Main_process.write(0, filename)
+                Main_process.user_com.send(Config.SUCC)
+
+            elif command == Config.Read_For_User:
+                content = Main_process.read(filename)
+                Main_process.user_com.send(content)
+
+            elif command == Config.Delete_For_User:
+                Main_process.delete(filename)
+
+            elif command == Config.Modify_For_User:
+                Main_process.delete(filename)
+
+                contents = Main_process.user_com.receive()
+                Main_process.write_finish = False
+
+                for content1 in contents:
+                    Main_process.write(content1)
+
+                Main_process.write_finish = True
+                Main_process.write(0, filename)
+
+            else:
+                chaos = Main_process.user_com.receive()
+                raise Exception
+        except Exception as e:
+            print(e)
+            Main_process.user_com.send(Config.ERROR)
