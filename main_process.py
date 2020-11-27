@@ -247,6 +247,7 @@ if __name__ == '__main__':
     # Main_process.delete("./imgs/test0")
 
 
+
     while True:
         try:
             command = Main_process.user_com.receive()
