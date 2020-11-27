@@ -25,6 +25,8 @@ And the commands for user process are following:
 >modity _filename_ \
 >delete _filename_
 
+All downloaded files will be save in `download_from_server` folder.
+
 ## Features
 - File system operations:
     - Read
