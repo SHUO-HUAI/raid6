@@ -10,12 +10,6 @@ import numpy as np
 from communication import Communication
 import check_error
 
-
-# def bitwise_xor_bytes(a, b):
-#     result_int = int.from_bytes(a, byteorder="big") ^ int.from_bytes(b, byteorder="big")
-#     return result_int.to_bytes(max(len(a), len(b)), byteorder="big")
-
-
 class Main:
     def __init__(self, ip, ports_for_storage, port_for_user):
 
@@ -193,7 +187,6 @@ class Main:
             return Config.ERROR
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Main Process')
     parser.add_argument('--storage_port', default=[9990 + port_i for port_i in range(Config.SN)], type=list,
@@ -216,38 +209,6 @@ if __name__ == '__main__':
     # then it will wait user process to connect, then it will listen to user's command
     # storage_com, user_com = Main_process.connect(my_ip, args.storage_port, args.user_port)
     Main_process = Main(my_ip, args.storage_port, args.user_port)
-    # i = 0
-    # while True:
-    #     k = input()
-    #     if int(k) == 0:
-    #         break
-    #
-    #     read_b = open("./imgs/Distributed system project 2020.docx", "rb")
-    #     Main_process.write_finish = False
-    #     name = "./imgs/test" + str(i)
-    #     while True:
-    #         content1 = read_b.read(Config.BS - Config.BFI)  # a content is a block size - information size
-    #         if len(content1) == 0:
-    #             break
-    #         else:
-    #             Main_process.write(content1)
-    #     read_b.close()
-    #
-    #     i = i + 1
-    #     Main_process.write_finish = True
-    #     Main_process.write(0, name)
-    #     print(Main_process.all_record_files)
-# <<<<<<< HEAD
-
-    # content = Main_process.read("./imgs/test0")
-    # write = open('./imgs/read_test.docx', 'wb')
-    # # for c in all_centent:
-    # write.write(content)
-    # write.close()
-    # Main_process.delete("./imgs/test0")
-
-
-
     while True:
         try:
             command = Main_process.user_com.receive()

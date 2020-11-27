@@ -156,9 +156,7 @@ class Verifier:
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
-        #
-        # print((self.gflog[x], self.gflog[coeff], self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]))
-        # input()
+
         if x == 0 or coeff == 0:
             return bytes([0])
         else:
@@ -188,8 +186,6 @@ class Verifier:
         if not test:
 
             for c_i in range(len(contents)):
-                # if contents[c_i][0] == b'':  # if blank then all zero
-                # print(len(contents[c_i]))
                 assert len(contents[c_i][0]) == Config.BS
 
         blocks = list()
