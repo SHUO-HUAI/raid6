@@ -120,7 +120,7 @@ class Communication:
                 file_info_size = struct.calcsize('I')
                 buf = comm.recv(file_info_size)
         except BrokenPipeError as e:
-            print(str(storage_id) + ' has been broken!!')
+            # print(str(storage_id) + ' has been broken!!')
             # del self.comm[storage_id]
             return Config.ERROR  # need to be record by main process, then re-construct
         return Config.SUCC

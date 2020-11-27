@@ -68,10 +68,10 @@ class Storage:
                 if_occupy.append(occupy)
             no_occupy_index = [idx for idx in range(len(if_occupy)) if if_occupy[idx] == 0]
             # block_id = random.sample(no_occupy_index, 1)[0]
-            print(no_occupy_index)
+            # print(no_occupy_index)
             block_id = min(no_occupy_index)
             block_id = block_id + Config.RBFM + Config.RBFS
-        print(block_id)
+        # print(block_id)
 
         # whether used for record file information
         if not record_file_info:
@@ -218,6 +218,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     Storage_process = Storage(PATH, my_ip, args.storage_port, init)
+    print('Connect to RAID 6 Server: ', my_ip)
 
     while True:
         command = Storage_process.com_ser.receive()

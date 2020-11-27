@@ -69,12 +69,15 @@ class Verifier:
                         for j in range(Config.SS):
                             if j not in broken_storage_ids:
                                 data_a = bitwise_xor_bytes(data_a, bytes([new_contents[(j, blk_id)][0][i]]))
-                                data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes([new_contents[(j, blk_id)][0][i]]),
-                                                                                    coeffs[j]))
-                                data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes([new_contents[(j, blk_id)][0][i]]),
-                                                                                    coeff_a))
-                        data_b = bitwise_xor_bytes(data_b, self._gf_product(bytes([new_contents[(self.p_id, blk_id)][0][i]]),
+                                data_b = bitwise_xor_bytes(data_b,
+                                                           self._gf_product(bytes([new_contents[(j, blk_id)][0][i]]),
+                                                                            coeffs[j]))
+                                data_b = bitwise_xor_bytes(data_b,
+                                                           self._gf_product(bytes([new_contents[(j, blk_id)][0][i]]),
                                                                             coeff_a))
+                        data_b = bitwise_xor_bytes(data_b,
+                                                   self._gf_product(bytes([new_contents[(self.p_id, blk_id)][0][i]]),
+                                                                    coeff_a))
                         data_b = bitwise_xor_bytes(data_b, bytes([new_contents[(self.q_id, blk_id)][0][i]]))
                         data_b = self._gf_div(data_b, bitwise_xor_bytes(bytes([coeff_a]), bytes([coeff_b])))
                         recover_b += data_b
@@ -104,7 +107,8 @@ class Verifier:
             for i in range(Config.BS):
                 q_check = b'\x00'
                 for j in range(Config.SS):
-                    q_check = bitwise_xor_bytes(q_check, self._gf_product(bytes([contents[(j, blk_id)][0][i]]), coeffs[j]))
+                    q_check = bitwise_xor_bytes(q_check,
+                                                self._gf_product(bytes([contents[(j, blk_id)][0][i]]), coeffs[j]))
                 recover_block += q_check
             contents[(self.q_id, blk_id)] = [recover_block]
 
@@ -127,8 +131,9 @@ class Verifier:
                 data = b'\x00'
                 for j in range(Config.SS):
                     if j != data_id:
-                        data = bitwise_xor_bytes(data, self._gf_product(bytes([contents[(j, blk_id)][0][i]]), coeffs[j]))
-                data = bitwise_xor_bytes(data, contents[self.q_id])
+                        data = bitwise_xor_bytes(data,
+                                                 self._gf_product(bytes([contents[(j, blk_id)][0][i]]), coeffs[j]))
+                data = bitwise_xor_bytes(data, bytes([contents[(self.q_id, blk_id)][0][i]]))
                 data = self._gf_div(data, coeffs[data_id])
                 recover_block += data
             contents[(data_id, blk_id)] = [recover_block]
@@ -153,14 +158,20 @@ class Verifier:
         #
         # print((self.gflog[x], self.gflog[coeff], self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]))
         # input()
-        return bytes([self.gfilog[(self.gflog[x] + self.gflog[coeff]) % 255]])
+        if x == 0 or coeff == 0:
+            return bytes([0])
+        else:
+            return bytes([self.gfilog[int((int(self.gflog[x]) + int(self.gflog[coeff])) % 255)]])
 
     def _gf_div(self, x, coeff):
         if isinstance(x, bytes):
             x = int.from_bytes(x, byteorder="big")
         if isinstance(coeff, bytes):
             coeff = int.from_bytes(coeff, byteorder="big")
-        return bytes([self.gfilog[(self.gflog[x] - self.gflog[coeff] + 255) % 255]])
+        if x == 0 or coeff == 0:
+            return bytes([0])
+        else:
+            return bytes([self.gfilog[int(self.gflog[x]) - int(self.gflog[coeff]) % 255]])
 
     def coefficient(self, index):
         if 2 ** index < self.gfbound:
@@ -176,7 +187,7 @@ class Verifier:
 
         for c_i in range(len(contents)):
             # if contents[c_i][0] == b'':  # if blank then all zero
-            print(len(contents[c_i]))
+            # print(len(contents[c_i]))
             assert len(contents[c_i][0]) == Config.BS
 
         blocks = list()

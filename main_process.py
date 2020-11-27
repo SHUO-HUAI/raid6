@@ -49,16 +49,16 @@ class Main:
                 free_blocks_each_stroage.append(len(free_blocks))
             free_blocks_each_stroage = np.array(free_blocks_each_stroage)
 
-            print(free_blocks_each_stroage)
+            # print(free_blocks_each_stroage)
             storage_id = free_blocks_each_stroage.argmax()  # save content to the most empty storage
-            print(storage_id)
+            # print(storage_id)
 
             self.storage_ser.send(Config.Write_storage, storage_id)  # write commend
             self.storage_ser.send('None', storage_id)  # block id
             self.storage_ser.send(content, storage_id)  # content
             block_id = self.storage_ser.receive(storage_id)
             assert block_id != Config.ERROR
-            self.write_record_tmp.append([storage_id, block_id])
+            self.write_record_tmp.append((storage_id, block_id))
 
             # for computing p q
             all_contents_for_pq = []
@@ -68,8 +68,8 @@ class Main:
                 content_read = self.storage_ser.receive(s_id)
                 all_contents_for_pq.append(content_read)
             p_block, q_block = self.check_error.parties_renew(all_contents_for_pq)
-            print('p_block', len(p_block))
-            print('q_block', len(q_block))
+            # print('p_block', len(p_block))
+            # print('q_block', len(q_block))
 
             # for writing p q
             self.storage_ser.send(Config.Write_storage_For_p, Config.SS)  # write commend for p
@@ -87,6 +87,7 @@ class Main:
             self.all_record_files[filename] = np.array(self.write_record_tmp)
             self.write_record_tmp = []
             self.write_finish = False
+        print('Write done')
 
     def read(self, filename):
         self.ping()
@@ -105,7 +106,7 @@ class Main:
             content = content_i[0][Config.BFI:length + Config.BFI]
 
             all_content = all_content + content
-
+        print('Read done')
         return all_content
 
     def delete(self, filename):
@@ -124,6 +125,7 @@ class Main:
             SUCC = self.storage_ser.receive(storage_id)
             assert SUCC != Config.ERROR
         self.all_record_files.pop(filename)
+        print('Delete done')
 
     def modify(self, content, filename):
         # delete and write, as write commend need to be called more than one times. so this method will implement
@@ -143,6 +145,7 @@ class Main:
                 broken_ids.append(s_id)
 
         if len(broken_ids) > 0:
+            print('Begin Recovering')
             all_contents_for_recovery = {}
             for s_id in range(Config.SN):
                 if s_id not in broken_ids:
@@ -163,7 +166,10 @@ class Main:
                     self.storage_ser.send(block_id, storage_id)
                     self.storage_ser.send(all_recover_data[(storage_id, block_id)][0], storage_id)
                     block_id = self.storage_ser.receive(storage_id)
-                    print(block_id)
+                    # print(block_id)
+            print('Recovering done')
+        print('Ping Done')
+
 
 
 if __name__ == '__main__':
