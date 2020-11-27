@@ -19,7 +19,7 @@ Then you need to start N storage process, N is defined in config.py, each storag
 Finally, you can use User process for saving and reading data from the RAID 6 system by:
 > python user_process.py --some_configs
 
-And the commands for user are following:
+And the commands for user process are following:
 >upload _filename_ \
 >download _filename_ \
 >modity _filename_ \
@@ -35,12 +35,11 @@ And the commands for user are following:
     - Two parities blocks
     - Recover broken <= 2 disks
     - Find which storage is failed by network connection and parities
-    - Support n+2 configurations, n for storage, 2 for parities
+    - Support n+2 configurations, n(>=2) for storage, 2 for parities
 -  Data structure:
     - Any size of data and any type of data
-    - Binary storage is used
     - A list is used to map the filename to its location, mutable files
-    - Fixed-size of binary files to simulate physical storage blocks
+    - Fixed-size of binary files to simulate physical storage blocks for storage
 - Network Storage:
-    - Support each storage process is on a different machine
+    - Support each storage process on a different machine
     - Socket technique is used
