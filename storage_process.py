@@ -217,6 +217,10 @@ if __name__ == '__main__':
         print(msg)
         sys.exit(1)
 
+    if args.ip is not None:
+        my_ip = args.ip
+
+
     Storage_process = Storage(PATH, my_ip, args.storage_port, init)
     print('Connect to RAID 6 Server: ', my_ip)
 

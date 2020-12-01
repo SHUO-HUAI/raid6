@@ -16,7 +16,7 @@ class User:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='User Process')
-    parser.add_argument('--ip', default='127.0.0.1', type=str, help='main process ip address (default: localhost)')
+    parser.add_argument('--ip', default=None, type=str, help='main process ip address (default: localhost)')
     parser.add_argument('--user_port', default=12346, type=int, help='main process ports for user process')
     args = parser.parse_args()
 
@@ -29,6 +29,9 @@ if __name__ == '__main__':
     except socket.error as msg:
         print(msg)
         sys.exit(1)
+
+    if args.ip is not None:
+        my_ip = args.ip
 
     User_process = User(my_ip, args.user_port)
     while True:
