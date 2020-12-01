@@ -191,7 +191,7 @@ class Storage:
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Storage Process')
-    parser.add_argument('--ip', default='127.0.0.1', type=str, help='main process ip address (default: localhost)')
+    parser.add_argument('--ip', default=None, type=str, help='main process ip address (default: localhost)')
     parser.add_argument('--storage_port', default=[9990 + port_i for port_i in range(Config.SN)], type=list,
                         help='main process ports for storage process')
     parser.add_argument('--path', default='', type=str, help='save path, blank for first run')
@@ -219,7 +219,6 @@ if __name__ == '__main__':
 
     if args.ip is not None:
         my_ip = args.ip
-
 
     Storage_process = Storage(PATH, my_ip, args.storage_port, init)
     print('Connect to RAID 6 Server: ', my_ip)
