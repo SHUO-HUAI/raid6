@@ -20,7 +20,7 @@ class Config:
     ERROR = 4294967295  # as all stuck pack we used is unsigned int, so we use 4294967295 for error
     SUCC = 1
 
-    # commend
+    # commands
     Free_blocks = 'Looking up empty block amount...'
     Write_storage = 'Writing storage data...'
     Write_storage_For_p = 'writing storage data with length...'
