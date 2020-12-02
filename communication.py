@@ -72,7 +72,7 @@ class Communication:
 
         assert len(self.comm) > 0
 
-    def hock_for_broken(self, broken_ids):  # only can be called by server for storage
+    def hook_for_broken(self, broken_ids):  # only can be called by server for storage
         assert self.is_server
         assert not self.for_user
         broken_i = 0
